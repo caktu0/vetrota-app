@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Calistoga&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Caveat:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FDFBF7;
+    --foreground: #2D241E;
+    
+    --primary: #C67B5C;
+    --primary-hover: #B5651D;
+    
+    --secondary: #6B7B3C;
+    --accent: #D97706;
+    
+    --card: #FFFFFF;
+    --muted: #F4EFE6;
+    --border: #E8DFD3;
+    
+    --destructive: #B91C1C;
+    --info: #6B8FAD;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}

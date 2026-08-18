@@ -1,0 +1,132 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String
+  surname       String?
+  email         String        @unique
+  emailVerified DateTime?
+  password      String?
+  phone         String?
+  role          String        @default("USER") // USER or VET
+  image         String?
+  title         String?       // For vets, e.g. "Uzm. Veteriner Hekim"
+  clinic        String?       // For vets
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  pets          Pet[]
+  addresses     Address[]
+  userAppts     Appointment[] @relation("UserAppointments")
+  vetAppts      Appointment[] @relation("VetAppointments")
+  messages      ChatMessage[]
+}
+
+model Pet {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  species      String        // Kedi, Köpek, Kuş, vb.
+  breed        String?
+  age          Int?
+  weight       Float?
+  gender       String?       // Erkek, Dişi
+  notes        String?
+  image        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  appointments Appointment[]
+}
+
+model Address {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String        // Ev, İş, Yazlık vb.
+  district     String        // Kadıköy, Maltepe
+  neighborhood String        // Fenerbahçe, Suadiye, Feyzullah vb.
+  street       String
+  buildingNo   String?
+  apartmentNo  String?
+  fullAddress  String
+  isDefault    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  appointments Appointment[]
+}
+
+model Service {
+  id          String        @id @default(cuid())
+  name        String
+  description String
+  type        String        // HOME, ONLINE
+  price       Float
+  duration    Int           // minutes
+  icon        String
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation("UserAppointments", fields: [userId], references: [id], onDelete: Cascade)
+  vetId       String?
+  vet         User?         @relation("VetAppointments", fields: [vetId], references: [id])
+  serviceId   String
+  service     Service       @relation(fields: [serviceId], references: [id])
+  petId       String?
+  pet         Pet?          @relation(fields: [petId], references: [id])
+  addressId   String?
+  address     Address?      @relation(fields: [addressId], references: [id])
+  
+  date        String        // YYYY-MM-DD
+  time        String        // HH:MM
+  type        String        // HOME, ONLINE
+  status      String        @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, RESCHEDULED
+  notes       String?
+  vetNotes    String?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model BlogPost {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  summary     String
+  content     String
+  category    String
+  readTime    String
+  author      String
+  imageUrl    String?
+  publishedAt DateTime      @default(now())
+}
+
+model Newsletter {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  subscribedAt DateTime     @default(now())
+}
+
+model ChatMessage {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String          // user, assistant, system
+  content   String
+  createdAt DateTime        @default(now())
+}
