@@ -1,7 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const GEMINI_API_KEY =
-  process.env.GEMINI_API_KEY || "AQ.Ab8RN6I_A6V4JhKbNGpoSWqYP1IOW3z_ix4mP2TBYprz4AKj4A";
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  throw new Error("GEMINI_API_KEY .env.local dosyasında tanımlanmamış!");
+}
+
+const resolvedApiKey: string = apiKey;
+
+export const genAI = new GoogleGenerativeAI(resolvedApiKey);
+export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
 
 const SYSTEM_PROMPT = `
 Sen VetRota platformunun uzman ve samimi yapay zeka veteriner asistanısın. 
@@ -48,8 +57,8 @@ export async function askGemini(
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
+    const genAIClient = new GoogleGenerativeAI(resolvedApiKey);
+    const model = genAIClient.getGenerativeModel({
       model: "gemini-1.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
