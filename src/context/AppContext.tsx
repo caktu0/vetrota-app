@@ -10,8 +10,16 @@ import {
   ChatMessageItem,
   BlogPostItem,
   AppointmentStatus,
+  SubServiceItem,
+  MainCategoryItem,
 } from "@/types";
-import { SUPPORTED_REGIONS, NeighborhoodOption, SERVICES_LIST, BLOG_POSTS as INITIAL_BLOG_DATA } from "@/lib/constants";
+import {
+  SUPPORTED_REGIONS,
+  NeighborhoodOption,
+  TIME_SLOTS,
+  MAIN_CATEGORIES,
+  BLOG_POSTS as INITIAL_BLOG_DATA,
+} from "@/lib/constants";
 import { askGemini } from "@/lib/gemini";
 
 interface ToastInfo {
@@ -30,9 +38,15 @@ interface AppContextType {
   logout: () => void;
   selectedRegion: NeighborhoodOption;
   setSelectedRegion: (region: NeighborhoodOption) => void;
+  selectedTimeSlot: string;
+  setSelectedTimeSlot: (slot: string) => void;
   toast: ToastInfo | null;
   showToast: (msg: string, type?: "success" | "info" | "warning") => void;
   
+  // Active Mobile Navigation & Modals
+  activeMobileCategory: MainCategoryItem | null;
+  setActiveMobileCategory: (cat: MainCategoryItem | null) => void;
+
   // Pets
   pets: PetItem[];
   addPet: (pet: Omit<PetItem, "id" | "userId">) => void;
@@ -44,22 +58,21 @@ interface AppContextType {
   addAddress: (addr: Omit<AddressItem, "id" | "userId">) => void;
   removeAddress: (id: string) => void;
 
-  // Appointments
+  // Appointments / Mobile Orders
   appointments: AppointmentItem[];
-  bookAppointment: (data: {
-    serviceId: string;
-    date: string;
-    time: string;
+  bookSubService: (data: {
+    subService: SubServiceItem;
+    categoryTitle?: string;
+    selectedWeight?: string;
     petId?: string;
     addressId?: string;
-    type: "home" | "online";
     userNotes?: string;
-  }) => { success: boolean; error?: string; appointment?: AppointmentItem };
+    timeSlot?: string;
+  }) => { success: boolean; appointment?: AppointmentItem; error?: string };
   updateAppointmentStatus: (id: string, status: AppointmentStatus, vetNotes?: string) => void;
-  rescheduleAppointment: (id: string, newDate: string, newTime: string) => void;
   cancelAppointment: (id: string) => void;
 
-  // Blog Management (User can read, Vet can CRUD)
+  // Blog Management
   blogPosts: BlogPostItem[];
   addBlogPost: (post: Omit<BlogPostItem, "id" | "publishedDate">) => void;
   updateBlogPost: (id: string, post: Partial<BlogPostItem>) => void;
@@ -79,6 +92,8 @@ interface AppContextType {
   // Region Modal
   isRegionModalOpen: boolean;
   setIsRegionModalOpen: (open: boolean) => void;
+  isTimeSlotModalOpen: boolean;
+  setIsTimeSlotModalOpen: (open: boolean) => void;
 }
 
 const DEFAULT_USER: UserProfile = {
@@ -108,7 +123,7 @@ const INITIAL_MESSAGES: ChatMessageItem[] = [
     id: "msg-1",
     sender: "assistant",
     senderName: "VetRota Ekibi",
-    text: "Merhaba! VetRota ekibinden yazıyorum. Dostunla ilgili bir sorun mu var, yoksa randevunla mı ilgili yazıyorsun?",
+    text: "Merhaba! VetRota mobil uygulamasından yazıyorum. Dostunla ilgili bir sağlık sorunu mu var, yoksa randevu ve siparişinle mi ilgili destek istiyorsun?",
     timestamp: "Şimdi",
     actionType: "NONE",
   },
@@ -121,8 +136,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [role, setRoleState] = useState<UserRole>("USER");
   const [currentUser, setCurrentUser] = useState<UserProfile>(DEFAULT_USER);
   const [selectedRegion, setSelectedRegionState] = useState<NeighborhoodOption>(SUPPORTED_REGIONS[0]);
+  const [selectedTimeSlot, setSelectedTimeSlotState] = useState<string>(TIME_SLOTS[0]);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   
+  const [activeMobileCategory, setActiveMobileCategory] = useState<MainCategoryItem | null>(null);
   const [pets, setPets] = useState<PetItem[]>([]);
   const [addresses, setAddresses] = useState<AddressItem[]>([]);
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
@@ -132,6 +149,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isOperatorConnected, setIsOperatorConnected] = useState(false);
   const [newsletterEmails, setNewsletterEmails] = useState<string[]>([]);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+  const [isTimeSlotModalOpen, setIsTimeSlotModalOpen] = useState(false);
 
   // Load from LocalStorage on mount
   useEffect(() => {
@@ -186,7 +204,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("vetrota_role", targetRole);
     localStorage.setItem("vetrota_user", JSON.stringify(fullUser));
 
-    // If new registration, ensure clean slate (0 pets, 0 appointments)
     if (isNewRegistration) {
       setPets([]);
       setAddresses([]);
@@ -214,14 +231,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setToast({ message, type, id });
     setTimeout(() => {
       setToast((prev) => (prev?.id === id ? null : prev));
-    }, 3200);
+    }, 3500);
   };
 
   const setSelectedRegion = (region: NeighborhoodOption) => {
     setSelectedRegionState(region);
     localStorage.setItem("vetrota_region", region.id);
     setIsRegionModalOpen(false);
-    showToast(`${region.name}, ${region.district} seçildi.`, "success");
+    showToast(`Teslimat adresi güncellendi: ${region.name}, ${region.district}`, "success");
+  };
+
+  const setSelectedTimeSlot = (slot: string) => {
+    setSelectedTimeSlotState(slot);
+    setIsTimeSlotModalOpen(false);
+    showToast(`Teslimat/Randevu zamanı seçildi: ${slot}`, "info");
   };
 
   // Pet management
@@ -271,28 +294,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast("Adres kaldırıldı.", "info");
   };
 
-  // Appointments
-  const bookAppointment = (data: {
-    serviceId: string;
-    date: string;
-    time: string;
+  // Mobile SubService Booking / Ordering
+  const bookSubService = (data: {
+    subService: SubServiceItem;
+    categoryTitle?: string;
+    selectedWeight?: string;
     petId?: string;
     addressId?: string;
-    type: "home" | "online";
     userNotes?: string;
+    timeSlot?: string;
   }) => {
-    const isOccupied = appointments.some(
-      (a) => a.date === data.date && a.time === data.time && a.status !== "CANCELLED"
-    );
-
-    if (isOccupied) {
-      showToast("Seçtiğiniz tarih ve saat doludur. Lütfen başka bir saat seçiniz.", "warning");
-      return { success: false, error: "Bu saat için randevu daha önce alınmıştır." };
-    }
-
-    const service = SERVICES_LIST.find((s) => s.id === data.serviceId);
-    const pet = pets.find((p) => p.id === data.petId);
+    const slot = data.timeSlot || selectedTimeSlot;
+    const pet = pets.find((p) => p.id === data.petId) || pets[0];
     const address = addresses.find((a) => a.id === data.addressId);
+
+    const isOrderType = data.subService.categoryId.startsWith("eve-mama") || data.subService.categoryId.startsWith("eve-petshop") || data.subService.categoryId.startsWith("eve-takviye");
 
     const newAppt: AppointmentItem = {
       id: `appt-${Date.now()}`,
@@ -301,30 +317,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       userPhone: currentUser.phone,
       vetId: "vet-1",
       vetName: "Dr. Selin Aydın",
-      serviceId: data.serviceId,
-      serviceName: service?.name || "Veterinerlik Hizmeti",
-      servicePrice: service?.price || 0,
-      serviceDuration: service?.durationMin || 30,
-      serviceIcon: service?.iconName || "Stethoscope",
-      type: data.type,
-      petId: data.petId,
-      petName: pet?.name,
-      petSpecies: pet?.species,
-      addressId: data.addressId,
+      categoryId: data.subService.categoryId,
+      categoryTitle: data.categoryTitle || "VetRota Mobil Hizmet",
+      serviceId: data.subService.id,
+      serviceName: data.selectedWeight ? `${data.subService.name} (${data.selectedWeight})` : data.subService.name,
+      servicePrice: data.subService.price,
+      type: isOrderType ? "order" : data.subService.categoryId.includes("online") ? "online" : "home",
+      petId: pet?.id,
+      petName: pet?.name || "Patili Dostunuz",
+      petSpecies: pet?.species || "Kedi/Köpek",
+      addressId: address?.id,
       addressSummary: address ? `${address.neighborhood}, ${address.district}` : `${selectedRegion.name}, ${selectedRegion.district}`,
       district: address?.district || selectedRegion.district,
       neighborhood: address?.neighborhood || selectedRegion.name,
-      date: data.date,
-      time: data.time,
+      date: slot.split(" ")[0] || "Bugün",
+      time: slot.substring(slot.indexOf(" ") + 1) || "09:00 - 10:00",
       status: "CONFIRMED",
       userNotes: data.userNotes,
+      specialNotice: data.subService.noticeText,
       createdAt: new Date().toISOString(),
     };
 
     const updated = [newAppt, ...appointments];
     setAppointments(updated);
     localStorage.setItem("vetrota_appts", JSON.stringify(updated));
-    showToast("Randevunuz başarıyla oluşturuldu! Hekimimiz bilgilendirildi.", "success");
+
+    if (isOrderType) {
+      showToast(`${data.subService.name} siparişiniz alındı! Adresinize teslim edilecektir. 📦`, "success");
+    } else {
+      showToast(`${data.subService.name} randevunuz oluşturuldu! 🐾`, "success");
+    }
+
+    setActiveMobileCategory(null);
     return { success: true, appointment: newAppt };
   };
 
@@ -334,16 +358,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
     setAppointments(updated);
     localStorage.setItem("vetrota_appts", JSON.stringify(updated));
-    showToast(`Randevu durumu güncellendi: ${status === "COMPLETED" ? "Başarıyla Tamamlandı" : status}`, "success");
-  };
-
-  const rescheduleAppointment = (id: string, newDate: string, newTime: string) => {
-    const updated = appointments.map((a) =>
-      a.id === id ? { ...a, date: newDate, time: newTime, status: "RESCHEDULED" as AppointmentStatus } : a
-    );
-    setAppointments(updated);
-    localStorage.setItem("vetrota_appts", JSON.stringify(updated));
-    showToast(`Randevu yeni tarihe taşındı: ${newDate} - ${newTime}`, "info");
+    showToast(`İşlem durumu güncellendi: ${status}`, "success");
   };
 
   const cancelAppointment = (id: string) => {
@@ -352,10 +367,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
     setAppointments(updated);
     localStorage.setItem("vetrota_appts", JSON.stringify(updated));
-    showToast("Randevu iptal edildi.", "warning");
+    showToast("İşlem iptal edildi.", "warning");
   };
 
-  // Blog Management (Vet can CRUD, User can read)
+  // Blog Management
   const addBlogPost = (postData: Omit<BlogPostItem, "id" | "publishedDate">) => {
     const newPost: BlogPostItem = {
       ...postData,
@@ -365,7 +380,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updated = [newPost, ...blogPosts];
     setBlogPosts(updated);
     localStorage.setItem("vetrota_blogs", JSON.stringify(updated));
-    showToast("Yeni blog yazısı başarıyla yayınlandı! 📰", "success");
+    showToast("Yeni blog yazısı yayınlandı! 📰", "success");
   };
 
   const updateBlogPost = (id: string, postData: Partial<BlogPostItem>) => {
@@ -379,7 +394,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const updated = blogPosts.filter((p) => p.id !== id);
     setBlogPosts(updated);
     localStorage.setItem("vetrota_blogs", JSON.stringify(updated));
-    showToast("Blog yazısı yayından kaldırıldı.", "info");
+    showToast("Blog yazısı silindi.", "info");
   };
 
   // Chat message
@@ -431,7 +446,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         id: `msg-ai-${Date.now()}`,
         sender: "assistant",
         senderName: "VetRota Asistanı",
-        text: "Dostunuz için evde randevu oluşturabilir, aşı ve muayene hizmetlerimiz hakkında detaylı bilgi alabilirsiniz.",
+        text: "Dostunuz için evde sağlık uygulaması veya mama/takviye siparişi oluşturmak için kategorilerimizi inceleyebilirsiniz.",
         timestamp: new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
         actionType: "BOOKING_LINK",
       };
@@ -447,7 +462,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       id: `msg-op-${Date.now()}`,
       sender: "operator",
       senderName: "Dr. Selin Aydın (Nöbetçi Canlı Destek)",
-      text: "Merhaba! Ben Nöbetçi Veteriner Hekim Dr. Selin Aydın. Canlı destek hattına bağlandınız. Dostunuzun durumu hakkında size doğrudan yardımcı olmak için buradayım.",
+      text: "Merhaba! Ben Nöbetçi Veteriner Hekim Dr. Selin Aydın. VetRota canlı destek hattına bağlandınız. Size nasıl yardımcı olabilirim?",
       timestamp: new Date().toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
       actionType: "LIVE_SUPPORT_CONNECTED",
     };
@@ -462,7 +477,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return true;
     }
     setNewsletterEmails((prev) => [...prev, email]);
-    showToast("VetRota haftalık bültenine başarıyla abone oldunuz! 💌", "success");
+    showToast("VetRota bültenine başarıyla abone oldunuz! 💌", "success");
     return true;
   };
 
@@ -478,8 +493,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         logout,
         selectedRegion,
         setSelectedRegion,
+        selectedTimeSlot,
+        setSelectedTimeSlot,
         toast,
         showToast,
+        activeMobileCategory,
+        setActiveMobileCategory,
         pets,
         addPet,
         updatePet,
@@ -488,9 +507,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addAddress,
         removeAddress,
         appointments,
-        bookAppointment,
+        bookSubService,
         updateAppointmentStatus,
-        rescheduleAppointment,
         cancelAppointment,
         blogPosts,
         addBlogPost,
@@ -505,6 +523,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         subscribeNewsletter,
         isRegionModalOpen,
         setIsRegionModalOpen,
+        isTimeSlotModalOpen,
+        setIsTimeSlotModalOpen,
       }}
     >
       {children}

@@ -1,10 +1,4 @@
-export interface NeighborhoodOption {
-  id: string;
-  name: string;
-  district: "Kadıköy" | "Maltepe";
-  city: "İstanbul";
-  isAvailableForHomeVisit: boolean;
-}
+import { MainCategoryItem, NeighborhoodOption } from "@/types";
 
 export const SUPPORTED_REGIONS: NeighborhoodOption[] = [
   // Kadıköy
@@ -19,202 +13,508 @@ export const SUPPORTED_REGIONS: NeighborhoodOption[] = [
   { id: "mal-feyzullah", name: "Feyzullah", district: "Maltepe", city: "İstanbul", isAvailableForHomeVisit: true },
 ];
 
-export interface ServiceItem {
-  id: string;
-  name: string;
-  shortDesc: string;
-  description: string;
-  category: "home" | "online";
-  price: number;
-  durationMin: number;
-  iconName: string;
-  tags: string[];
-  features: string[];
-}
-
-export const SERVICES_LIST: ServiceItem[] = [
-  // Evde Hizmetler
-  {
-    id: "evde-muayene",
-    name: "Evde Genel Muayene",
-    shortDesc: "Ev konforunda stresiz kapsamlı klinik kontrol",
-    description: "Evcil dostunuzun kendi güvenli ortamında, kliniğe gitme stresi yaşamadan uzman veteriner hekim tarafından tepeden tırnağa kapsamlı fiziksel muayenesi.",
-    category: "home",
-    price: 850,
-    durationMin: 45,
-    iconName: "Stethoscope",
-    tags: ["Popüler", "Stresiz"],
-    features: ["Fiziksel muayene", "Kalp ve solunum dinleme", "Göz, kulak ve ağız kontrolü", "Sağlık karne güncellemesi"],
-  },
-  {
-    id: "evde-tirnak-kesimi",
-    name: "Evde Tırnak Kesimi & Bakım",
-    shortDesc: "Hassas ve güvenli tırnak ve pati bakımı",
-    description: "Özel hekim ekipmanları ile damar hattına zarar vermeden acısız ve güvenli tırnak kesimi, pati tüyleri düzeltme ve pati nemlendirici bakımı.",
-    category: "home",
-    price: 350,
-    durationMin: 20,
-    iconName: "Scissors",
-    tags: ["Hızlı Bakım"],
-    features: ["Hijyenik kesim", "Pati altı temizliği", "Pati kremi uygulaması", "Kulak temizliği opsiyonu"],
-  },
-  {
-    id: "evde-ic-dis-parazit",
-    name: "Evde İç & Dış Parazit Uygulaması",
-    shortDesc: "Rutin koruyucu damla ve tablet parazit tedavisi",
-    description: "Dostunuzun kilosuna ve yaşam tarzına en uygun orijinal veteriner paraziter ilaçlarının hekim kontrolünde güvenle uygulanması.",
-    category: "home",
-    price: 550,
-    durationMin: 25,
-    iconName: "ShieldCheck",
-    tags: ["Koruyucu Sağlık"],
-    features: ["İç parazit uygulaması", "Dış parazit ense damlası", "Kilo takibi", "Uygulama takip takvimine kayıt"],
-  },
-  {
-    id: "evde-asi-uygulamasi",
-    name: "Evde Aşı Uygulaması",
-    shortDesc: "Soğuk zincir garantili karma, kuduz ve lösemi aşıları",
-    description: "Aşı öncesi mini sağlık kontrolü yapılarak soğuk zinciri bozulmamış orijinal aşıların evinizde güvenli şekilde uygulanması ve aşı karnesine işlenmesi.",
-    category: "home",
-    price: 650,
-    durationMin: 30,
-    iconName: "Syringe",
-    tags: ["Önemli"],
-    features: ["Aşı öncesi ateş & durum kontrolü", "Soğuk zincir aşı", "Aşı karnesi barkod onayı", "Alerji takip süresi"],
-  },
-  {
-    id: "evde-kan-alimi",
-    name: "Evde Kan Alımı & Lab Testleri",
-    shortDesc: "Laboratuvar tetkikleri için stressiz kan örneği alma",
-    description: "Hemogram, biyokimya veya hormon paneli için dostunuzu hırpalamadan evinde uzman hekim tarafından kan alınması ve yetkili laboratuvara sevki.",
-    category: "home",
-    price: 900,
-    durationMin: 30,
-    iconName: "Droplets",
-    tags: ["Diagnostik"],
-    features: ["Stressiz numune alımı", "Soğuk tüp muhafazası", "Lab sevki ve takip", "Sonuçların dijital raporlanması"],
-  },
-  // Online Hizmetler
-  {
-    id: "online-muayene",
-    name: "Online Görüntülü Muayene",
-    shortDesc: "HD video bağlantısıyla anlık hekim değerlendirmesi",
-    description: "Evden çıkmadan, uzman veteriner hekimle birebir görüntülü görüşme sağlayarak acil durum triyajı, deri-göz-davranış değerlendirmesi ve reçete yönlendirmesi.",
-    category: "online",
-    price: 450,
-    durationMin: 30,
-    iconName: "Video",
-    tags: ["Tüm Türkiye", "Hızlı"],
-    features: ["Birebir HD video seansı", "Görsel semptom analizi", "Dijital ön rapor & reçete tavsiyesi", "Mesajlaşma desteği"],
-  },
-  {
-    id: "online-danismanlik",
-    name: "Online Beslenme & Davranış Danışmanlığı",
-    shortDesc: "Kişiselleştirilmiş beslenme, diyet ve davranış eğitimi",
-    description: "Irk, yaş, kilo ve mevcut sağlık durumuna özel mama seçimi, kilo verme programı veya tuvalet/sosyalleşme davranış problemleri için kapsamlı danışmanlık.",
-    category: "online",
-    price: 380,
-    durationMin: 40,
-    iconName: "MessagesSquare",
-    tags: ["Tüm Türkiye"],
-    features: ["Kapsamlı anamnez formu", "Beslenme & kalori planı", "Davranış modifikasyon rehberi", "1 haftalık soru-cevap hakkı"],
-  },
+export const TIME_SLOTS: string[] = [
+  "Bugün 09:00 - 10:00",
+  "Bugün 10:30 - 11:30",
+  "Bugün 12:00 - 13:00",
+  "Bugün 14:00 - 15:00",
+  "Bugün 15:30 - 16:30",
+  "Bugün 17:00 - 18:00",
+  "Bugün 18:30 - 19:30",
+  "Yarın 09:00 - 10:00",
+  "Yarın 11:00 - 12:00",
+  "Yarın 14:00 - 15:00",
 ];
 
-export const TIME_SLOTS = [
-  "09:00", "09:30", "10:00", "10:30",
-  "11:00", "11:30", "12:00", "12:30",
-  "13:30", "14:00", "14:30", "15:00",
-  "15:30", "16:00", "16:30", "17:00",
-  "17:30", "18:00"
+// MAIN MOBILE SERVICE CATEGORIES MATCHING THE REFERENCE IMAGE & USER SPECIFICATIONS
+export const MAIN_CATEGORIES: MainCategoryItem[] = [
+  {
+    id: "evde-saglik",
+    number: 1,
+    title: "1. Evde Sağlık Hizmeti",
+    shortDesc: "Aşılama, muayene, parazit uygulama ve daha fazlası",
+    badgeIconName: "HomeMedical",
+    bgColor: "bg-[#FAF5FF]",
+    borderColor: "border-[#F3E8FF]",
+    badgeBgColor: "bg-[#7E22CE]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#7E22CE]",
+    image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=500&auto=format&fit=crop&q=80",
+    subServices: [
+      {
+        id: "sag-evde-muayene",
+        categoryId: "evde-saglik",
+        name: "Evde Genel Muayene",
+        description: "Evcil dostunuzun kendi ev ortamında, kliniğe gitme stresi yaşamadan uzman veteriner hekim tarafından tepeden tırnağa fiziki kontrolü.",
+        price: 850,
+        unit: "Seans",
+        features: ["Stresiz ortam muayenesi", "Kalp & Akciğer dinleme", "Karne kontrolü & Aşı takvimi hazırlığı"],
+      },
+      {
+        id: "sag-kedi-aylik-parazit",
+        categoryId: "evde-saglik",
+        name: "Evde Kedi Aylık İç/Dış Antiparaziter Uygulama",
+        description: "Kediler için 1 aylık koruma sağlayan orijinal ense damlası ve iç parazit uygulaması.",
+        price: 650,
+        unit: "Uygulama",
+        features: ["1 Ay Tam Koruma", "Pire, Kene ve İç Parazit", "Hekim Tarafından Ense Damlası"],
+      },
+      {
+        id: "sag-kedi-3aylik-parazit",
+        categoryId: "evde-saglik",
+        name: "Evde Kedi 3 Aylık İç/Dış Antiparaziter Uygulama",
+        description: "3 ay boyunca tam geniş spektrumlu koruma sağlayan premium parazit uygulaması.",
+        price: 1250,
+        unit: "Uygulama",
+        features: ["3 Ay Uzun Süreli Koruma", "Yüksek Etki Spektrumu", "Evde Hekim Uygulaması"],
+      },
+      {
+        id: "sag-kopek-dis-parazit",
+        categoryId: "evde-saglik",
+        name: "Evde Köpek Dış Parazit Uygulaması",
+        description: "Köpeğinizin kilo aralığına uygun orijinal dış parazit damla ve lezzetlendirilmiş tablet uygulaması.",
+        price: 750,
+        unit: "Uygulama",
+        weightOptions: ["2.5 - 5 kg (550₺)", "5 - 10 kg (650₺)", "10 - 20 kg (750₺)", "20 - 40 kg (850₺)"],
+        features: ["Kilo Odaklı Özel Dozlama", "Pire & Kene Koruması", "Evde Hızlı Uygulama"],
+      },
+      {
+        id: "sag-kedi-karma-asi",
+        categoryId: "evde-saglik",
+        name: "Evde Yıllık Kedi Karma Aşısı",
+        description: "Kedileri Feline Panleukopenia, Calicivirus ve Rhinotracheitis virüslerine karşı koruyan yıllık koruyucu aşı.",
+        price: 750,
+        unit: "Doz",
+        features: ["Soğuk Zincir Garantisi", "3 Tip Virüse Karşı Koruma", "Aşı Karnesi İşleme"],
+      },
+      {
+        id: "sag-kopek-karma-asi",
+        categoryId: "evde-saglik",
+        name: "Evde Yıllık Köpek Karma Aşısı",
+        description: "Köpeklerde Gençlik Hastalığı (Distemper), Parvovirus, Hepatit ve Leptospirosis virüslerine karşı yıllık temel karma aşı.",
+        price: 800,
+        unit: "Doz",
+        features: ["Soğuk Zincir Saklama", "Geniş Virüs Koruması", "Karne Onayı"],
+      },
+      {
+        id: "sag-kedi-losemi-asi",
+        categoryId: "evde-saglik",
+        name: "Evde Yıllık Kedi Lösemi Aşısı (FeLV)",
+        description: "Kedi Lösemi Virüsü (FeLV) enfeksiyonuna karşı yıllık koruyucu aşı uygulaması.",
+        price: 900,
+        unit: "Doz",
+        requiresNotice: true,
+        noticeText: "ZORUNLU UYARI: İlk defa lösemi aşısı yaptıracak kedilerde aşı öncesi Hızlı Test Kiti ile FeLV/FIV testi yapılması zorunludur. Test kiti aşılama sırasında hekimimizce uygulanabilir.",
+        features: ["FeLV Koruması", "İlk Aşılamada Test Şartı", "Hekim Takibi"],
+      },
+      {
+        id: "sag-kopek-bronsin-asi",
+        categoryId: "evde-saglik",
+        name: "Evde Yıllık Köpek Bronşin Aşısı",
+        description: "Köpek Barınak Öksürüğü (Kennel Cough - Bordetella bronchiseptica) hastalığına karşı koruyucu aşı.",
+        price: 750,
+        unit: "Doz",
+        features: ["Solunum Yolu Koruması", "Özellikle Sosyal Köpekler İçin İdeal", "Burun İçi veya Enjeksiyon"],
+      },
+      {
+        id: "sag-kuduz-asi",
+        categoryId: "evde-saglik",
+        name: "Evde Yıllık Kuduz Aşısı (Kedi & Köpek)",
+        description: "Yasal olarak zorunlu olan ve tüm kedi & köpek dostlarımıza yıllık uygulanan orijinal kuduz aşısı.",
+        price: 500,
+        unit: "Doz",
+        features: ["Yasal Zorunlu Aşı", "Bakanlık Onaylı Orijinal Aşı", "Resmi Sağlık Karnesi Onayı"],
+      },
+    ],
+  },
+  {
+    id: "eve-mama",
+    number: 2,
+    title: "2. Eve Mama Hizmeti",
+    shortDesc: "Veteriner serisi dahil tüm mama markaları",
+    badgeIconName: "ShoppingBag",
+    bgColor: "bg-[#FEFCE8]",
+    borderColor: "border-[#FEF9C3]",
+    badgeBgColor: "bg-[#EAB308]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#CA8A04]",
+    image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=500&auto=format&fit=crop&q=80",
+    subServices: [
+      {
+        id: "mama-royal-canin-sterilised",
+        categoryId: "eve-mama",
+        brand: "Royal Canin",
+        name: "Royal Canin Sterilised Kısırlaştırılmış Kedi Maması",
+        description: "Kısırlaştırılmış yetişkin kedilerin ideal kilo yönetimini destekleyen premium günlük kuru mama.",
+        price: 980,
+        unit: "4 kg",
+        weightOptions: ["2 kg (580₺)", "4 kg (980₺)", "10 kg (2.150₺)"],
+        features: ["Kilo Kontrolü", "Üriner Sistem Desteği", "Orijinal Ürün"],
+      },
+      {
+        id: "mama-royal-canin-gastro",
+        categoryId: "eve-mama",
+        brand: "Royal Canin Veterinary",
+        name: "Royal Canin Veterinary Gastrointestinal Kedi/Köpek Maması",
+        description: "Sindirim sistemi hassasiyeti ve akut bağırsak emilim bozuklukları için özel reçeteli veteriner maması.",
+        price: 1350,
+        unit: "2 kg",
+        isPrescriptionNeeded: true,
+        features: ["Reçeteli Veteriner Serisi", "Sindirim Desteği", "Yüksek Enerji Yoğunluğu"],
+      },
+      {
+        id: "mama-royal-canin-hypo",
+        categoryId: "eve-mama",
+        brand: "Royal Canin Veterinary",
+        name: "Royal Canin Hypoallergenic İlaçlı Diyet Maması",
+        description: "Besin intoleransı ve gıda alerjisi olan kedi ve köpekler için hidrolize proteinli veteriner serisi.",
+        price: 1480,
+        unit: "2.5 kg",
+        isPrescriptionNeeded: true,
+        features: ["Hidrolize Soy Protein", "Deri Bariyer Desteği", "Gıda Alerjisi Çözümü"],
+      },
+      {
+        id: "mama-proplan-optistart",
+        categoryId: "eve-mama",
+        brand: "Pro Plan",
+        name: "Pro Plan Adult Original Somonlu Kedi Maması",
+        description: "Gerçek somon etli, böbrek sağlığını destekleyen Optisenses formüllü yetişkin kedi maması.",
+        price: 890,
+        unit: "3 kg",
+        weightOptions: ["1.5 kg (490₺)", "3 kg (890₺)", "10 kg (1.950₺)"],
+        features: ["Somon Proteini", "Böbrek Desteği", "Tüy Parlaklığı"],
+      },
+      {
+        id: "mama-hills-cd-urinary",
+        categoryId: "eve-mama",
+        brand: "Hill's Prescription Diet",
+        name: "Hill's Prescription Diet c/d Multicare Urinary Care",
+        description: "İdrar yolu taşları ve Feline Idiopathic Cystitis (FIC) riski taşıyan kediler için klinikte kanıtlanmış mama.",
+        price: 1290,
+        unit: "1.5 kg",
+        isPrescriptionNeeded: true,
+        features: ["Struvite Taşı Çözümü", "Stres Yönetim Bileşenleri", "Klinik Reçeteli"],
+      },
+      {
+        id: "mama-nd-pumpkin",
+        categoryId: "eve-mama",
+        brand: "N&D Farmina",
+        name: "N&D Grain Free Balıklı & Balkabaklı Kedi Maması",
+        description: "Tahılsız, yüksek taze balık ve balkabağı içeriği ile sindirimi kolay lüks gurme mama.",
+        price: 1150,
+        unit: "5 kg",
+        features: ["%96 Hayvansal Protein", "%0 Tahıl", "Düşük Glisemik İndeks"],
+      },
+    ],
+  },
+  {
+    id: "eve-petshop",
+    number: 3,
+    title: "3. Eve Petshop Ürünleri",
+    shortDesc: "Oyuncak, kedi kumu, tasma, kıyafet ve daha fazlası",
+    badgeIconName: "ShoppingCart",
+    bgColor: "bg-[#F0FDF4]",
+    borderColor: "border-[#DCFCE7]",
+    badgeBgColor: "bg-[#16A34A]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#15803D]",
+    image: "https://images.unsplash.com/photo-1545249390-6bdfa286032f?w=500&auto=format&fit=crop&q=80",
+    subServices: [
+      {
+        id: "shop-kedi-kumu-bentonit",
+        categoryId: "eve-petshop",
+        name: "Bentonit Doğal Kedi Kumu (İnce Tane, Kokusuz)",
+        description: "%99.5 tozsuz, anında yüksek topaklanan %100 doğal beyaz bentonit kedi kumu.",
+        price: 240,
+        unit: "10 Litre",
+        features: ["Anında Topaklanma", "Tozsuz Formül", "Koku Hapsetme"],
+      },
+      {
+        id: "shop-kum-kuregi-tuvalet",
+        categoryId: "eve-petshop",
+        name: "Ergonomik Elek Kum Küreği & Tuvalet Kabı",
+        description: "Dayanıklı, kolay temizlenen süzgeçli kum küreği ve yüksek kenarlı hijyenik kedi tuvaleti seti.",
+        price: 280,
+        unit: "Set",
+        features: ["Kolay Temizlik", "Dayanıklı Plastik", "Hijyenik Tasarım"],
+      },
+      {
+        id: "shop-atik-poseti",
+        categoryId: "eve-petshop",
+        name: "Köpek Gezdirme Atık Poşet Seti (4 Rulo + Rulo Kabı)",
+        description: "Sızdırmaz, dayanıklı atık poşeti rulosu ve tasmanın sapına takılabilen pratik aparat.",
+        price: 120,
+        unit: "4 Rulo",
+        features: ["Sızdırmaz Güçlü Yapı", "Pratik Klipsli Kap", "60 Adet Poşet"],
+      },
+      {
+        id: "shop-tasma-gogus",
+        categoryId: "eve-petshop",
+        name: "Ayarlanabilir Ergonomik Göğüs Tasması & Gezdirme",
+        description: "Yumuşak dokulu, köpeğin göğsünü sıkmayan ve gece parlayan reflektörlü göğüs tasması.",
+        price: 320,
+        unit: "Adet",
+        features: ["Reflektörlü Şerit", "Nefes Alabilen Kumaş", "S/M/L Beden"],
+      },
+      {
+        id: "shop-yakalik-elisabeth",
+        categoryId: "eve-petshop",
+        name: "Elisabeth Şeffaf Koruyucu Korse Yakalık",
+        description: "Operasyon veya tedavi sonrası dostumuzun yarayı yalamasını önleyen medikal şeffaf yakalık.",
+        price: 150,
+        unit: "Adet",
+        features: ["Yumuşak Kenar Koruma", "Cırt Cırtlı Kolay Ayar", "Medikal Uyum"],
+      },
+      {
+        id: "shop-agizlik-güvenlik",
+        categoryId: "eve-petshop",
+        name: "Nefes Alan Yumuşak Köpek Ağızlığı",
+        description: "Veteriner ziyaretlerinde ve kalabalık ortamlarda güvenlik sağlayan rahat ağızlık.",
+        price: 180,
+        unit: "Adet",
+        features: ["Hava Geçirgen File", "Baskı Yapmayan Kesim", "Güvenli Klips"],
+      },
+      {
+        id: "shop-tirnak-makasi-pati",
+        categoryId: "eve-petshop",
+        name: "Emniyet Kilitli Tırnak Makası & Pati Bakım Seti",
+        description: "Paslanmaz çelik bıçaklı, emniyet stoperli tırnak kesici ve törpü seti.",
+        price: 220,
+        unit: "Set",
+        features: ["Emniyet Kilidi", "Paslanmaz Çelik", "Törpü Hediye"],
+      },
+      {
+        id: "shop-oyuncak-set",
+        categoryId: "eve-petshop",
+        name: "Kedi & Köpek İnteraktif Oyuncak Seti",
+        description: "Zilli toplar, ipli pelüş fare ve köşe kaşınma aparatı içeren neşeli oyun paketi.",
+        price: 190,
+        unit: "Paket",
+        features: ["Kedi Oltası", "Köpek Isırma Halatı", "Zilli Toplar"],
+      },
+      {
+        id: "shop-[#kiyafet-yagmurluk]",
+        categoryId: "eve-petshop",
+        name: "Kışlık Sıcak Tutar Polar Kıyafet / Yağmurluk",
+        description: "Soğuk ve yağmurlu havalarda dostunuzu koruyan su geçirmez şık yürüyüş kıyafeti.",
+        price: 340,
+        unit: "Adet",
+        features: ["Su Geçirmez Dış Yüzey", "İç Polar Kaplama", "Kolay Giyilebilir"],
+      },
+    ],
+  },
+  {
+    id: "eve-takviye",
+    number: 4,
+    title: "4. Eve Takviye Ürün Hizmeti",
+    shortDesc: "Vitaminler, maltlar ve destekleyici ürünler",
+    badgeIconName: "ShieldMedical",
+    bgColor: "bg-[#EFF6FF]",
+    borderColor: "border-[#DBEAFE]",
+    badgeBgColor: "bg-[#2563EB]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#1D4ED8]",
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500&auto=format&fit=crop&q=80",
+    subServices: [
+      {
+        id: "tak-malt-gimcat",
+        categoryId: "eve-takviye",
+        brand: "GimCat / Bioline",
+        name: "Tüy Yumağı Önleyici Malt Macun (Anti-Hairball Paste)",
+        description: "Yalanma sırasında yutulan tüylerin midede yumaklaşmasını önleyen lezzetli malt macun.",
+        price: 290,
+        unit: "100 gr",
+        features: ["Doğal Aromalı Malt", "Sindirim Kolaylığı", "Yutulan Tüyleri Atma"],
+      },
+      {
+        id: "tak-vetexpert-vetomune",
+        categoryId: "eve-takviye",
+        brand: "VetExpert",
+        name: "VetExpert Vetomune Bağışıklık Destekleyici (Twist-Off)",
+        description: "Hastalık, mevsim geçişleri veya aşı dönemi kedilerde bağışıklık sistemini güçlendiren kapsül.",
+        price: 640,
+        unit: "60 Kapsül",
+        features: ["Beta-Glukan & HMB", "Pratik Twist-Off Kapsül", "Yüksek Emilim"],
+      },
+      {
+        id: "tak-vetexpert-arthrovet",
+        categoryId: "eve-takviye",
+        brand: "VetExpert",
+        name: "VetExpert ArthroVet Eklem & Kıkırdak Koruyucu Kompleks",
+        description: "Yaslı kedi ve köpeklerde eklem ağrılarını hafifleten, Glukozamin & Kondroitin takviyesi.",
+        price: 780,
+        unit: "60 Tablet",
+        features: ["Eklem Sıvısı Desteği", "Kıkırdak Koruma", "Hareket Kolaylığı"],
+      },
+      {
+        id: "tak-vetqom-qomvit",
+        categoryId: "eve-takviye",
+        brand: "Vetqom",
+        name: "Vetqom QomVit Multivitamin & Tüy Bakım Macunu",
+        description: "12 temel vitamin ve Biyotin içeren tüy dökülmesini azaltan zengin takviye paste.",
+        price: 380,
+        unit: "100 gr",
+        features: ["Tüy Dökülmesine Karşı", "Biyotin & Çinko", "Yüksek Lezzet"],
+      },
+      {
+        id: "tak-veda-kotbayun",
+        categoryId: "eve-takviye",
+        brand: "Veda",
+        name: "Veda KotBayun Bitkisel Sakinleştirici Damla / Tablet",
+        description: "Kızgınlık, yolculuk, taşınma ve veteriner stresi olan kedi ve köpekler için %100 bitkisel sakinleştirici.",
+        price: 320,
+        unit: "50 ml",
+        features: ["%100 Bitkisel Ekstreler", "Yan Etkisiz Sakinlik", "Stres Yönetimi"],
+      },
+      {
+        id: "tak-vetux-probiotic",
+        categoryId: "eve-takviye",
+        brand: "Vetux",
+        name: "Vetux Probiotic & Prebiotic Gut Health Paste",
+        description: "Antibiyotik kullanımı veya ishal sonrası bağırsak florasını hızla düzenleyen mikroflora macunu.",
+        price: 420,
+        unit: "50 gr",
+        features: ["Canlı Probiyotik Suşlar", "İshal & Gaz Çözümü", "Hızlı Etki"],
+      },
+    ],
+  },
+  {
+    id: "evde-acil",
+    number: 5,
+    title: "5. Evde Acil Durum Hizmeti",
+    shortDesc: "7/24 acil müdahale",
+    badgeIconName: "SirenAlert",
+    bgColor: "bg-[#FFF1F2]",
+    borderColor: "border-[#FCE7F3]",
+    badgeBgColor: "bg-[#E11D48]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#E11D48]",
+    image: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=500&auto=format&fit=crop&q=80",
+    isComingSoon: true,
+    badgeTag: "Yakında",
+    subServices: [
+      {
+        id: "acil-724-mobil",
+        categoryId: "evde-acil",
+        name: "7/24 Acil Mobil Veteriner Müdahale Ekibi",
+        description: "Gece ve gündüz acil vakalarda (zehirlenme, travma, nefes darlığı) tam donanımlı acil veteriner aracımız adrese yönlendirilir.",
+        price: 1500,
+        unit: "Müdahale",
+        features: ["7/24 Acil Hat", "Oksijen & İlkyardım Çantası", "Klinik Transfer İmkanı"],
+      },
+    ],
+  },
+  {
+    id: "online-muayene",
+    number: 6,
+    title: "6. Online Muayene Hizmeti",
+    shortDesc: "Uzman veterinerden online muayene",
+    badgeIconName: "MessageCircle",
+    bgColor: "bg-[#FAF5FF]",
+    borderColor: "border-[#F3E8FF]",
+    badgeBgColor: "bg-[#7C3AED]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#7C3AED]",
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=80",
+    subServices: [
+      {
+        id: "onl-goruntulu-muayene",
+        categoryId: "online-muayene",
+        name: "Online HD Görüntülü Veteriner Muayenesi",
+        description: "Akıllı telefonunuzdan uzman veteriner hekimimizle 30 dakika canlı görüntülü görüşün. Semptom değerlendirmesi ve e-reçete danışmanlığı alın.",
+        price: 450,
+        unit: "30 Dk Seans",
+        features: ["Canlı HD Video Görüşme", "Ön Teşhis & Reçete Önerisi", "Tüm Türkiye'de Geçerli"],
+      },
+    ],
+  },
+  {
+    id: "online-davranis",
+    number: 7,
+    title: "7. Online Veteriner Davranış Danışmanlığı",
+    shortDesc: "Davranış problemlerinde profesyonel destek ve danışmanlık",
+    badgeIconName: "BrainHeart",
+    bgColor: "bg-[#FFF7ED]",
+    borderColor: "border-[#FFEDD5]",
+    badgeBgColor: "bg-[#EA580C]",
+    badgeTextColor: "text-white",
+    iconColor: "text-[#EA580C]",
+    image: "https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=700&auto=format&fit=crop&q=80",
+    isFullWidth: true,
+    subServices: [
+      {
+        id: "onl-davranis-seansi",
+        categoryId: "online-davranis",
+        name: "Profesyonel Veteriner Davranış Danışmanlık Seansı",
+        description: "Tuvalet eğitimi sorunları, aşırı havlama/tırmalama, ayrılık kaygısı ve kitle/insan agresyonu konularında uzman veteriner davranış hekimi ile 45 dakikalık birebir terapi.",
+        price: 600,
+        unit: "45 Dk Terapi",
+        features: ["Kişiselleştirilmiş Eğitim Planı", "Kaygı & Agresyon Yönetimi", "Gelişim Takip Raporu"],
+      },
+    ],
+  },
 ];
 
 export const VET_DOCTORS = [
   {
     id: "vet-1",
     name: "Dr. Selin Aydın",
-    title: "Uzm. Veteriner Hekim - İç Hastalıkları",
-    experienceYears: 8,
-    avatar: "https://images.unsplash.com/photo-1594824813689-d122241cf434?w=200&auto=format&fit=crop&q=80",
+    title: "Uzm. Veteriner Hekim & Küçük Hayvan Cerrahı",
+    experienceYears: 9,
     rating: 4.9,
-    reviewCount: 142,
-    serviceAreas: ["Kadıköy", "Maltepe"],
+    clinic: "VetRota Mobil Sağlık",
+    avatar: "https://images.unsplash.com/photo-1594824813689-d122241cf434?w=150&auto=format&fit=crop&q=80",
   },
   {
     id: "vet-2",
-    name: "Dr. Kerem Yılmaz",
-    title: "Veteriner Hekim - Cerrahi & Davranış",
-    experienceYears: 6,
-    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=200&auto=format&fit=crop&q=80",
+    name: "Dr. Mert Kaya",
+    title: "Veteriner Hekim & İç Hastalıkları Uzmanı",
+    experienceYears: 7,
     rating: 4.8,
-    reviewCount: 98,
-    serviceAreas: ["Kadıköy", "Maltepe"],
+    clinic: "VetRota Mobil Sağlık",
+    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
   },
 ];
 
 export const BLOG_POSTS = [
   {
     id: "blog-1",
-    slug: "kedilerde-asi-takvimi-ve-onemi",
-    title: "Kedilerde Yıllık Aşı Takvimi: Hangi Aşı Ne Zaman Yapılmalı?",
-    summary: "Karma, Kuduz ve Lösemi aşılarının zamanlaması, ev kedilerinin de aşıya neden ihtiyaç duyduğu ve aşı sonrası dikkat edilecekler.",
+    title: "Kedilerde Evde Aşılama Öncesi Dikkat Edilmesi Gerekenler",
+    slug: "kedilerde-evde-asilama-rehberi",
     category: "Aşı & Koruyucu Sağlık",
+    summary: "Kedinizin evde aşı olurken stresini en aza indirmek ve aşının etkinliğini artırmak için pratik tavsiyeler.",
+    content: `Evde veterinerlik hizmetinin en büyük avantajı kedinizin klinik stresinden uzak kalmasıdır.
+
+Ancak evde aşı öncesinde dikkat edilmesi gereken birkaç önemli nokta vardır:
+
+1. **Açlık ve Tokluk Durumu**: Aşılama öncesi kedinizi aşırı doyurmayın, hafif tok olması idealdir.
+2. **Sakin Ortam Hazırlığı**: Hekim gelmeden 15 dakika önce kedinizi sevdiği bir odaya alıp kapıyı kapalı tutun.
+3. **Lösemi Aşısı Hatırlatması**: İlk defa lösemi aşısı olacak kedilerde mutlaka öncesinde FeLV/FIV hızlı testi yapılmalıdır.
+
+Aşı sonrasında kedinizde hafif uykulu hal normaldir, ancak iştahsızlık 24 saati geçerse hekimimizle iletişime geçebilirsiniz.`,
+    imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop&q=80",
+    publishedDate: "14 Ağustos 2026",
     readTime: "4 dk okuma",
     author: "Dr. Selin Aydın",
-    publishedDate: "14 Ağustos 2026",
-    imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600&auto=format&fit=crop&q=80",
-    content: `Ev kedileri dışarı çıkmasa dahi ayakkabılarımız ve giysilerimizle dış ortamdan pek çok virüs ve bakteriyi eve taşırız. Bu sebeple evcil dostlarımızın aşılarının düzenli yapılması hayati öneme sahiptir.
-    
-    1. Karma Aşı (Feline Parvovirus, Herpes ve Calicivirus koruması)
-    2. Kuduz Aşısı (Yasal zorunluluk ve zoonoz hastalık koruması)
-    3. Lösemi Aşısı (Dışarı teması olan kediler için şart)
-    
-    Aşı sonrasında kedinizin 24-48 saat boyunca hafif halsiz olması normaldir. Bol taze su ve sessiz bir dinlenme alanı sağlayınız.`,
   },
   {
     id: "blog-2",
-    slug: "kopeklerde-evde-stresiz-tirnak-kesimi",
-    title: "Köpeklerde Pati Bakımı ve Stressiz Tırnak Kesimi Rehberi",
-    summary: "Köpeğinizin patisine basarken acı çekmemesi için tırnak uzunluğu ne olmalı? Evde veteriner desteğiyle acısız tırnak kesimi ipuçları.",
-    category: "Pati & Bakım",
-    readTime: "3 dk okuma",
-    author: "Dr. Kerem Yılmaz",
-    publishedDate: "10 Ağustos 2026",
-    imageUrl: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&auto=format&fit=crop&q=80",
-    content: `Uzayan tırnaklar köpeğinizin yürüyüş biyomekaniğini bozar ve eklem ağrılarına yol açabilir. Tırnak içindeki canlı doku (quick) sebebiyle kesim dikkatle yapılmalıdır.
-    
-    - Zemine basıldığında tırnak tıkırtısı geliyorsa kesim zamanı gelmiştir.
-    - Ev ortamında yapılan sakin ve ödüllü seanslar veteriner korkusunu tamamen yok eder.
-    - VetRota uzmanları patinin her dokusunu inceleyerek mantar ve yabancı cisim kontrolü de yapar.`,
-  },
-  {
-    id: "blog-3",
-    slug: "yaz-aylarinda-parazit-tehlikesi",
-    title: "Sıcak Havalarda Kene ve Pire İstilasına Karşı 5 Altın Kural",
-    summary: "İç ve dış parazit damlalarının etki süreleri, kene ısırmasında ilk müdahale ve doğal sanılan tehlikeli yöntemler.",
+    title: "Köpeklerde Dış Parazit Mevsimi ve Kilo Uyumu",
+    slug: "kopeklerde-dis-parazit-mevsimi",
     category: "Paraziter Tedavi",
-    readTime: "5 dk okuma",
-    author: "Dr. Selin Aydın",
-    publishedDate: "05 Ağustos 2026",
-    imageUrl: "https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=600&auto=format&fit=crop&q=80",
-    content: `Pire ve keneler yalnızca kaşıntı sebebi değil, Lyme ve Kan Paraziti (Ehrlichia) gibi ölümcül hastalıkların taşıyıcısıdır.
-    
-    - Dış parazit damlasını banyodan en az 48 saat sonra uygulayınız.
-    - Kene tespit ettiğinizde kesinlikle alkol veya kolonya dökmeyiniz (kene kusarak zehri kana verir).
-    - Evde düzenli veteriner hekim ziyareti ile koruyucu takvim asla aksamaz.`,
+    summary: "Pire ve kenelere karşı korumada köpeğinizin kiloluk doz ayarlamasının hayati önemi.",
+    content: `İlkbahar ve yaz aylarında artan kene ve pire riski köpeğinizin sağlığını tehdit eder.
+
+Dış parazit uygulamasında en sık yapılan hata köpeğin güncel kilosundan daha düşük dozda ilaç kullanılmasıdır.
+
+- **2.5 - 5 kg**: Küçük ırklar için hassas dozaj.
+- **5 - 10 kg**: Orta-küçük ırk koruması.
+- **10 - 20 kg ve 20 - 40 kg**: Büyük ırklarda damlanın doğru hat boyunca sürülmesi gereklidir.
+
+Evde hekim ziyaretlerimizde köpeğiniz hassas tartı ile tartılarak en doğru doz belirlenir.`,
+    imageUrl: "https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&auto=format&fit=crop&q=80",
+    publishedDate: "10 Ağustos 2026",
+    readTime: "3 dk okuma",
+    author: "Dr. Mert Kaya",
   },
-  {
-    id: "blog-4",
-    slug: "yasli-dostlarimiz-icin-kan-tahlilinin-onemi",
-    title: "7 Yaş Üstü Kedi ve Köpeklerde Erken Teşhis ve Kan Analizi",
-    summary: "Böbrek yetmezliği ve karaciğer enzimlerinin erken tespiti dostunuzun ömrünü nasıl 4 yıl uzatabilir?",
-    category: "Geriatrik Bakım",
-    readTime: "4 dk okuma",
-    author: "Dr. Kerem Yılmaz",
-    publishedDate: "28 Temmuz 2026",
-    imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=600&auto=format&fit=crop&q=80",
-    content: `Yaşlanan can dostlarımız hastalık belirtilerini içgüdüsel olarak gizler. Yılda en az 1 kez yapılan biyokimya ve hemogram paneli ile böbrek fonksiyonları erken evrede yakalanabilir.
-    
-    VetRota hekimi evinize gelerek dostunuzu strese sokmadan kan numunesi alır ve sonuçları aynı gün dijital olarak sizinle paylaşır.`,
-  }
 ];
