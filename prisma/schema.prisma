@@ -1,10 +1,16 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  VET
 }
 
 model User {
@@ -15,7 +21,7 @@ model User {
   emailVerified DateTime?
   password      String?
   phone         String?
-  role          String        @default("USER") // USER or VET
+  role          Role          @default(CUSTOMER)
   image         String?
   title         String?       // For vets, e.g. "Uzm. Veteriner Hekim"
   clinic        String?       // For vets

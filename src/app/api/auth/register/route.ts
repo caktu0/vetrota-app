@@ -9,7 +9,7 @@ const registerSchema = z.object({
   email: z.string().email("Geçerli bir e-posta adresi giriniz"),
   phone: z.string().min(10, "Geçerli bir telefon numarası giriniz"),
   password: z.string().min(6, "Şifre en az 6 karakter olmalıdır"),
-  role: z.enum(["USER", "VET"]),
+  role: z.enum(["CUSTOMER", "ADMIN", "VET", "USER"]).transform((val) => (val === "USER" ? "CUSTOMER" : val)),
 });
 
 export async function POST(req: Request) {
