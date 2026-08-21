@@ -1,4 +1,36 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+type GeminiModule = {
+  GoogleGenerativeAI: new (apiKey: string) => {
+    getGenerativeModel: (options: {
+      model: string;
+      systemInstruction?: string;
+    }) => {
+      startChat: (options: {
+        history: Array<{
+          role: "user" | "model";
+          parts: Array<{ text: string }>;
+        }>;
+        generationConfig: {
+          maxOutputTokens: number;
+          temperature: number;
+        };
+      }) => {
+        sendMessage: (message: string) => Promise<{ response: Promise<{ text: () => string }> }>;
+      };
+    };
+  };
+};
+
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
+async function getGeminiClient(): Promise<GeminiModule | null> {
+  try {
+    return (await new Function("return import('@google/generative-ai')")()) as GeminiModule;
+  } catch {
+    return null;
+  }
+}
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -8,8 +40,16 @@ if (!apiKey) {
 
 const resolvedApiKey: string = apiKey;
 
-export const genAI = new GoogleGenerativeAI(resolvedApiKey);
-export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+export let genAI: any = null;
+export let model: any = null;
+
+(async () => {
+  const GeminiClient = await getGeminiClient();
+  if (!GeminiClient) return;
+
+  genAI = new GeminiClient.GoogleGenerativeAI(resolvedApiKey);
+  model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+})();
 
 
 const SYSTEM_PROMPT = `
@@ -57,9 +97,19 @@ export async function askGemini(
   }
 
   try {
-    const genAIClient = new GoogleGenerativeAI(resolvedApiKey);
-    const model = genAIClient.getGenerativeModel({
-      model: "gemini-1.5-flash",
+    
+    let genAIClientInstance: any = genAI;
+    if (!genAIClientInstance) {
+      const GeminiClient = await getGeminiClient();
+      if (GeminiClient) {
+        genAIClientInstance = new GeminiClient.GoogleGenerativeAI(resolvedApiKey);
+      }
+    }
+
+    if (!genAIClientInstance) throw new Error('Gemini client unavailable');
+
+    const model = genAIClientInstance.getGenerativeModel({
+      model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
