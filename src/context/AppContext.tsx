@@ -12,10 +12,10 @@ import {
   AppointmentStatus,
   SubServiceItem,
   MainCategoryItem,
+  NeighborhoodOption,
 } from "@/types";
 import {
   SUPPORTED_REGIONS,
-  NeighborhoodOption,
   TIME_SLOTS,
   MAIN_CATEGORIES,
   BLOG_POSTS as INITIAL_BLOG_DATA,
@@ -132,7 +132,7 @@ const INITIAL_MESSAGES: ChatMessageItem[] = [
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [role, setRoleState] = useState<UserRole>("USER");
   const [currentUser, setCurrentUser] = useState<UserProfile>(DEFAULT_USER);
   const [selectedRegion, setSelectedRegionState] = useState<NeighborhoodOption>(SUPPORTED_REGIONS[0]);

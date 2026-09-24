@@ -455,6 +455,52 @@ export const MAIN_CATEGORIES: MainCategoryItem[] = [
   },
 ];
 
+const SERVICE_ICON_MAP: Record<string, string> = {
+  "evde-saglik": "Stethoscope",
+  "eve-mama": "ShieldCheck",
+  "eve-petshop": "Scissors",
+  "eve-takviye": "ShieldCheck",
+  "evde-acil": "Droplets",
+  "online-muayene": "Video",
+  "online-davranis": "MessagesSquare",
+};
+
+const getServiceCategory = (categoryId: string): "home" | "online" | "order" => {
+  if (categoryId.includes("online")) return "online";
+  if (["eve-mama", "eve-petshop", "eve-takviye"].includes(categoryId)) return "order";
+  return "home";
+};
+
+export type ServiceListItem = {
+  id: string;
+  categoryId: string;
+  category: "home" | "online" | "order";
+  categoryTitle: string;
+  name: string;
+  description: string;
+  price: number;
+  unit?: string;
+  image?: string;
+  brand?: string;
+  requiresNotice?: boolean;
+  noticeText?: string;
+  weightOptions?: string[];
+  features?: string[];
+  isPrescriptionNeeded?: boolean;
+  iconName: string;
+  durationMin: number;
+};
+
+export const SERVICES_LIST: ServiceListItem[] = MAIN_CATEGORIES.flatMap((category) =>
+  category.subServices.map((subService) => ({
+    ...subService,
+    category: getServiceCategory(category.id),
+    categoryTitle: category.title,
+    iconName: SERVICE_ICON_MAP[category.id] ?? "Stethoscope",
+    durationMin: category.id.includes("online") ? 30 : category.id === "eve-petshop" ? 20 : 45,
+  }))
+);
+
 export const VET_DOCTORS = [
   {
     id: "vet-1",

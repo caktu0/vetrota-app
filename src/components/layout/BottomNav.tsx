@@ -17,14 +17,17 @@ import {
 export function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { role, isAuthenticated, setActiveMobileCategory } = useApp();
+  const { role, setActiveMobileCategory } = useApp();
 
-  if (!isAuthenticated) return null;
+  // Hide bottom nav only on login/verify screens
+  if (pathname === "/login" || pathname === "/verify" || pathname === "/auth" || pathname === "/register") {
+    return null;
+  }
 
   const userNavItems = [
-    { label: "Ana Sayfa", href: "/home", icon: Home },
+    { label: "Ana Sayfa", href: "/", icon: Home },
     { label: "Siparişlerim", href: "/account?tab=appointments", icon: ShoppingBag },
-    { label: "Randevu Al", href: "/home", icon: CalendarPlus, isCenter: true },
+    { label: "Randevu Al", href: "/", icon: CalendarPlus, isCenter: true },
     { label: "Mesajlar", href: "/messages", icon: MessageSquare },
     { label: "Hesabım", href: "/account", icon: User },
   ];
@@ -42,17 +45,17 @@ export function BottomNav() {
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive =
-          item.href === "/home"
-            ? pathname === "/home" || pathname === "/"
+          item.href === "/"
+            ? pathname === "/" || pathname === "/home"
             : pathname.startsWith(item.href);
 
-        if (item.isCenter) {
+        if ("isCenter" in item && item.isCenter) {
           return (
             <button
               key={item.label}
               onClick={() => {
                 setActiveMobileCategory(null);
-                router.push("/home");
+                router.push("/");
               }}
               className="flex flex-col items-center justify-center -mt-6 group"
             >

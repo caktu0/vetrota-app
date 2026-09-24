@@ -1,56 +1,9 @@
-type GeminiModule = {
-  GoogleGenerativeAI: new (apiKey: string) => {
-    getGenerativeModel: (options: {
-      model: string;
-      systemInstruction?: string;
-    }) => {
-      startChat: (options: {
-        history: Array<{
-          role: "user" | "model";
-          parts: Array<{ text: string }>;
-        }>;
-        generationConfig: {
-          maxOutputTokens: number;
-          temperature: number;
-        };
-      }) => {
-        sendMessage: (message: string) => Promise<{ response: Promise<{ text: () => string }> }>;
-      };
-    };
-  };
-};
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-declare const process: {
-  env: Record<string, string | undefined>;
-};
+const getApiKey = () => process.env.GEMINI_API_KEY?.trim() || "";
 
-async function getGeminiClient(): Promise<GeminiModule | null> {
-  try {
-    return (await new Function("return import('@google/generative-ai')")()) as GeminiModule;
-  } catch {
-    return null;
-  }
-}
-
-const apiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY .env.local dosyasında tanımlanmamış!");
-}
-
-const resolvedApiKey: string = apiKey;
-
-export let genAI: any = null;
-export let model: any = null;
-
-(async () => {
-  const GeminiClient = await getGeminiClient();
-  if (!GeminiClient) return;
-
-  genAI = new GeminiClient.GoogleGenerativeAI(resolvedApiKey);
-  model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-})();
-
+export const genAI = getApiKey() ? new GoogleGenerativeAI(getApiKey()) : null;
+export const model = genAI ? genAI.getGenerativeModel({ model: "gemini-2.5-flash" }) : null;
 
 const SYSTEM_PROMPT = `
 Sen VetRota platformunun uzman ve samimi yapay zeka veteriner asistanısın. 
@@ -73,7 +26,23 @@ export async function askGemini(
   history: Array<{ role: "user" | "model"; text: string }> = []
 ): Promise<{ text: string; intent?: "BOOKING" | "OPERATOR" | "GENERAL" }> {
   const lower = userMessage.toLowerCase();
-  
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    const fallbackMessage =
+      "Merhaba! VetRota ekibi olarak dostunuzun sağlığı ve konforu için buradayız. Evde muayene, aşı, parazit bakımı, tırnak kesimi veya online görüntülü görüşme hizmetlerimiz hakkında bilgi alabilir ya da randevu oluşturabilirsiniz. Size nasıl yardımcı olabilirim?";
+
+    if (lower.includes("temsilci") || lower.includes("operatör") || lower.includes("canlı destek") || lower.includes("yetkili") || lower.includes("insan") || lower.includes("bağla")) {
+      return { text: "Talebinizi aldım. Sizi hemen VetRota nöbetçi canlı destek ekibimize ve müşteri temsilcimize aktarıyorum. Lütfen ayrılmayınız...", intent: "OPERATOR" };
+    }
+
+    if (lower.includes("randevu") || lower.includes("hizmet al") || lower.includes("fiyat") || lower.includes("çağır") || lower.includes("doktor") || lower.includes("muayene ol")) {
+      return { text: "Patili dostunuz için evde veya online randevu oluşturmak çok kolay! Kadıköy ve Maltepe mahallelerimizde uzman hekimlerimiz kapınıza kadar geliyor. Aşağıdaki butondan uygun gün ve saati seçerek randevunuzu hemen oluşturabilirsiniz.", intent: "BOOKING" };
+    }
+
+    return { text: fallbackMessage, intent: "GENERAL" };
+  }
+
   // Intent detection
   let intent: "BOOKING" | "OPERATOR" | "GENERAL" = "GENERAL";
   if (
@@ -97,23 +66,13 @@ export async function askGemini(
   }
 
   try {
-    
-    let genAIClientInstance: any = genAI;
-    if (!genAIClientInstance) {
-      const GeminiClient = await getGeminiClient();
-      if (GeminiClient) {
-        genAIClientInstance = new GeminiClient.GoogleGenerativeAI(resolvedApiKey);
-      }
-    }
-
-    if (!genAIClientInstance) throw new Error('Gemini client unavailable');
-
-    const model = genAIClientInstance.getGenerativeModel({
+    const genAIClient = new GoogleGenerativeAI(apiKey);
+    const activeModel = genAIClient.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
-    const chat = model.startChat({
+    const chat = activeModel.startChat({
       history: history.map((h) => ({
         role: h.role,
         parts: [{ text: h.text }],

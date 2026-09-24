@@ -2,12 +2,13 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { MapPin, Calendar, Bell, ChevronDown } from "lucide-react";
 
 export function Header() {
+  const pathname = usePathname();
   const {
-    isAuthenticated,
     selectedRegion,
     setIsRegionModalOpen,
     selectedTimeSlot,
@@ -15,14 +16,16 @@ export function Header() {
     role,
   } = useApp();
 
-  // Hide top header completely when not authenticated
-  if (!isAuthenticated) return null;
+  // Hide top header only on login/verify screens
+  if (pathname === "/login" || pathname === "/verify" || pathname === "/auth" || pathname === "/register") {
+    return null;
+  }
 
   return (
     <header className="w-full bg-[#FDFBF7] border-b border-[#E8DFD3]/60 px-4 pt-1 pb-3 space-y-2.5 z-40 flex-shrink-0">
       {/* 1. App Logo & Notification Bell Strip */}
       <div className="flex items-center justify-between">
-        <Link href="/home" className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group">
           <div className="w-9 h-9 rounded-2xl bg-[#C67B5C] text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
             <span className="text-lg font-bold">🐾</span>
           </div>
@@ -47,10 +50,10 @@ export function Header() {
         </button>
       </div>
 
-      {/* 2. Address & Time Slot Selector Pills (Matching Reference Screenshot) */}
+      {/* 2. Address & Time Slot Selector Pills */}
       {role === "USER" && (
         <div className="grid grid-cols-12 gap-2">
-          {/* Location Picker Pill (7 cols) */}
+          {/* Location Picker Pill */}
           <button
             type="button"
             onClick={() => setIsRegionModalOpen(true)}
@@ -70,7 +73,7 @@ export function Header() {
             <ChevronDown className="w-3.5 h-3.5 text-[#8B7355] flex-shrink-0 ml-1" />
           </button>
 
-          {/* Time Slot Picker Pill (5 cols) */}
+          {/* Time Slot Picker Pill */}
           <button
             type="button"
             onClick={() => setIsTimeSlotModalOpen(true)}

@@ -134,6 +134,14 @@ export interface MainCategoryItem {
   subServices: SubServiceItem[];
 }
 
+export interface NeighborhoodOption {
+  id: string;
+  name: string;
+  district: string;
+  city: string;
+  isAvailableForHomeVisit: boolean;
+}
+
 export interface CartItem {
   subService: SubServiceItem;
   quantity: number;
