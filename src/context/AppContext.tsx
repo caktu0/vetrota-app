@@ -13,6 +13,9 @@ import {
   SubServiceItem,
   MainCategoryItem,
   NeighborhoodOption,
+  CartItem,
+  ProductItem,
+  OrderItem,
 } from "@/types";
 import {
   SUPPORTED_REGIONS,
@@ -60,6 +63,15 @@ interface AppContextType {
 
   // Appointments / Mobile Orders
   appointments: AppointmentItem[];
+  bookAppointment: (data: {
+    serviceId: string;
+    date: string;
+    time: string;
+    petId?: string;
+    addressId?: string;
+    type?: "home" | "online" | "order";
+    userNotes?: string;
+  }) => { success: boolean; error?: string; appointment?: AppointmentItem };
   bookSubService: (data: {
     subService: SubServiceItem;
     categoryTitle?: string;
@@ -88,6 +100,26 @@ interface AppContextType {
   // Newsletter
   newsletterEmails: string[];
   subscribeNewsletter: (email: string) => boolean;
+
+  // Shopping Cart & E-Commerce
+  cart: CartItem[];
+  addToCart: (item: ProductItem | SubServiceItem, weight?: string, quantity?: number) => void;
+  updateCartQuantity: (cartItemId: string, delta: number) => void;
+  removeFromCart: (cartItemId: string) => void;
+  clearCart: () => void;
+  cartTotal: number;
+  cartCount: number;
+
+  // E-Commerce Orders
+  orders: OrderItem[];
+  createOrder: (orderData: {
+    address: AddressItem;
+    deliveryTime: string;
+    paymentMethod: "Kredi Kartı (Kapıda)" | "Nakit (Kapıda)" | "Online Kredi Kartı";
+    orderNotes?: string;
+    couponCode?: string;
+    discount?: number;
+  }) => OrderItem;
 
   // Region Modal
   isRegionModalOpen: boolean;
@@ -147,6 +179,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<ChatMessageItem[]>(INITIAL_MESSAGES);
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isOperatorConnected, setIsOperatorConnected] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
   const [newsletterEmails, setNewsletterEmails] = useState<string[]>([]);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [isTimeSlotModalOpen, setIsTimeSlotModalOpen] = useState(false);
@@ -182,6 +216,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       const savedBlogs = localStorage.getItem("vetrota_blogs");
       if (savedBlogs) setBlogPosts(JSON.parse(savedBlogs));
+
+      const savedCart = localStorage.getItem("vetrota_cart");
+      if (savedCart) setCart(JSON.parse(savedCart));
+
+      const savedOrders = localStorage.getItem("vetrota_orders");
+      if (savedOrders) setOrders(JSON.parse(savedOrders));
     } catch {
       // Ignore
     }
@@ -352,6 +392,52 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return { success: true, appointment: newAppt };
   };
 
+  const bookAppointment = (data: {
+    serviceId: string;
+    date: string;
+    time: string;
+    petId?: string;
+    addressId?: string;
+    type?: "home" | "online" | "order";
+    userNotes?: string;
+  }) => {
+    const pet = pets.find((p) => p.id === data.petId) || pets[0];
+    const address = addresses.find((a) => a.id === data.addressId) || addresses[0];
+
+    const newAppt: AppointmentItem = {
+      id: `appt-${Date.now()}`,
+      userId: currentUser.id,
+      userName: `${currentUser.name} ${currentUser.surname || ""}`.trim(),
+      userPhone: currentUser.phone,
+      vetId: "vet-1",
+      vetName: "Dr. Selin Aydın",
+      categoryId: "evde-saglik",
+      categoryTitle: "Evde Sağlık Hizmeti",
+      serviceId: data.serviceId,
+      serviceName: data.serviceId,
+      servicePrice: 750,
+      type: data.type || "home",
+      petId: pet?.id,
+      petName: pet?.name || "Patili Dostunuz",
+      petSpecies: pet?.species || "Kedi/Köpek",
+      addressId: address?.id,
+      addressSummary: address ? `${address.neighborhood}, ${address.district}` : `${selectedRegion.name}, ${selectedRegion.district}`,
+      district: address?.district || selectedRegion.district,
+      neighborhood: address?.neighborhood || selectedRegion.name,
+      date: data.date,
+      time: data.time,
+      status: "CONFIRMED",
+      userNotes: data.userNotes,
+      createdAt: new Date().toISOString(),
+    };
+
+    const updated = [newAppt, ...appointments];
+    setAppointments(updated);
+    localStorage.setItem("vetrota_appts", JSON.stringify(updated));
+    showToast("Randevunuz başarıyla oluşturuldu! Hekimimiz bilgilendirildi. 🐾", "success");
+    return { success: true, appointment: newAppt };
+  };
+
   const updateAppointmentStatus = (id: string, status: AppointmentStatus, vetNotes?: string) => {
     const updated = appointments.map((a) =>
       a.id === id ? { ...a, status, vetNotes: vetNotes !== undefined ? vetNotes : a.vetNotes } : a
@@ -481,6 +567,124 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return true;
   };
 
+  // ==========================================
+  // Shopping Cart & E-Commerce Logic
+  // ==========================================
+  const addToCart = (item: ProductItem | SubServiceItem, weight?: string, quantity: number = 1) => {
+    // Determine price based on weight option if present
+    let price = item.price;
+    if (weight) {
+      const match = weight.match(/\((\d+[\.,]?\d*)\s*₺\)/);
+      if (match) {
+        price = parseFloat(match[1].replace(".", "").replace(",", "."));
+      }
+    }
+
+    const cartKey = `${item.id}-${weight || "default"}`;
+
+    setCart((prev) => {
+      const existingIdx = prev.findIndex((c) => c.id === cartKey);
+      let updated: CartItem[];
+      if (existingIdx > -1) {
+        updated = [...prev];
+        updated[existingIdx] = {
+          ...updated[existingIdx],
+          quantity: updated[existingIdx].quantity + quantity,
+        };
+      } else {
+        const newItem: CartItem = {
+          id: cartKey,
+          product: item,
+          quantity,
+          selectedWeight: weight,
+          unitPrice: price,
+        };
+        updated = [...prev, newItem];
+      }
+      localStorage.setItem("vetrota_cart", JSON.stringify(updated));
+      return updated;
+    });
+
+    showToast(`${item.name} sepete eklendi! 🛒`, "success");
+  };
+
+  const updateCartQuantity = (cartItemId: string, delta: number) => {
+    setCart((prev) => {
+      const updated = prev
+        .map((item) => {
+          if (item.id === cartItemId) {
+            const newQty = item.quantity + delta;
+            return newQty > 0 ? { ...item, quantity: newQty } : null;
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[];
+
+      localStorage.setItem("vetrota_cart", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeFromCart = (cartItemId: string) => {
+    setCart((prev) => {
+      const updated = prev.filter((item) => item.id !== cartItemId);
+      localStorage.setItem("vetrota_cart", JSON.stringify(updated));
+      return updated;
+    });
+    showToast("Ürün sepetten kaldırıldı.", "info");
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem("vetrota_cart");
+  };
+
+  const cartTotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const createOrder = (orderData: {
+    address: AddressItem;
+    deliveryTime: string;
+    paymentMethod: "Kredi Kartı (Kapıda)" | "Nakit (Kapıda)" | "Online Kredi Kartı";
+    orderNotes?: string;
+    couponCode?: string;
+    discount?: number;
+  }): OrderItem => {
+    const subTotal = cartTotal;
+    const deliveryFee = subTotal >= 500 || subTotal === 0 ? 0 : 49.9;
+    const discount = orderData.discount || 0;
+    const totalAmount = Math.max(0, subTotal + deliveryFee - discount);
+
+    const randomCode = Math.floor(10000 + Math.random() * 90000);
+    const newOrder: OrderItem = {
+      id: `order-${Date.now()}`,
+      orderNumber: `#VR-${randomCode}`,
+      items: [...cart],
+      subTotal,
+      deliveryFee,
+      discount,
+      totalAmount,
+      couponCode: orderData.couponCode,
+      address: orderData.address,
+      deliveryTime: orderData.deliveryTime,
+      paymentMethod: orderData.paymentMethod,
+      orderNotes: orderData.orderNotes,
+      status: "HAZIRLANIYOR",
+      createdAt: new Date().toISOString(),
+      estimatedDeliveryTime: "30 - 45 Dakika",
+    };
+
+    const updated = [newOrder, ...orders];
+    setOrders(updated);
+    localStorage.setItem("vetrota_orders", JSON.stringify(updated));
+
+    // Clear cart after order creation
+    clearCart();
+
+    showToast(`Siparişiniz alındı! ${newOrder.orderNumber} 📦`, "success");
+    return newOrder;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -507,6 +711,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addAddress,
         removeAddress,
         appointments,
+        bookAppointment,
         bookSubService,
         updateAppointmentStatus,
         cancelAppointment,
@@ -521,6 +726,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         connectToOperator,
         newsletterEmails,
         subscribeNewsletter,
+        cart,
+        addToCart,
+        updateCartQuantity,
+        removeFromCart,
+        clearCart,
+        cartTotal,
+        cartCount,
+        orders,
+        createOrder,
         isRegionModalOpen,
         setIsRegionModalOpen,
         isTimeSlotModalOpen,

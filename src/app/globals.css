@@ -31,3 +31,14 @@
     @apply font-heading;
   }
 }
+
+/* Hide scrollbar for mobile mockups while keeping scrollability */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

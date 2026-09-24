@@ -142,8 +142,51 @@ export interface NeighborhoodOption {
   isAvailableForHomeVisit: boolean;
 }
 
+export interface ProductItem {
+  id: string;
+  name: string;
+  brand?: string;
+  category: "eve-mama" | "eve-petshop" | "eve-takviye" | "evde-saglik";
+  subCategory?: string;
+  species?: "Kedi" | "Köpek" | "Tümü";
+  price: number;
+  originalPrice?: number;
+  rating?: number;
+  ratingCount?: number;
+  unit: string;
+  weightOptions?: string[];
+  description: string;
+  features?: string[];
+  image: string;
+  inStock?: boolean;
+  isPrescriptionNeeded?: boolean;
+  requiresNotice?: boolean;
+  noticeText?: string;
+  badges?: string[];
+}
+
 export interface CartItem {
-  subService: SubServiceItem;
+  id: string; // unique cart entry id
+  product: ProductItem | SubServiceItem;
   quantity: number;
   selectedWeight?: string;
+  unitPrice: number;
+}
+
+export interface OrderItem {
+  id: string;
+  orderNumber: string;
+  items: CartItem[];
+  totalAmount: number;
+  subTotal: number;
+  deliveryFee: number;
+  discount: number;
+  couponCode?: string;
+  address: AddressItem;
+  deliveryTime: string;
+  paymentMethod: "Kredi Kartı (Kapıda)" | "Nakit (Kapıda)" | "Online Kredi Kartı";
+  orderNotes?: string;
+  status: "HAZIRLANIYOR" | "YOLDA" | "TESLİM EDİLDİ" | "İPTAL";
+  createdAt: string;
+  estimatedDeliveryTime: string;
 }

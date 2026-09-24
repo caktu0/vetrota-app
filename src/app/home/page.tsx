@@ -1,377 +1,304 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useApp } from "@/context/AppContext";
-import { MAIN_CATEGORIES } from "@/lib/constants";
-import { MainCategoryItem, SubServiceItem } from "@/types";
 import {
-  Home,
-  Stethoscope,
-  ShoppingBag,
-  ShoppingCart,
-  ShieldAlert,
-  ShieldCheck,
-  Video,
-  MessageCircle,
-  Brain,
-  Siren,
-  ChevronRight,
-  CheckCircle2,
+  TIP_OF_THE_DAY,
+  HOME_BLOG_POSTS,
+  BlogPostItemData,
+} from "@/lib/blog-data";
+import {
   Sparkles,
-  ArrowRight,
-  X,
-  Info,
+  BookOpen,
   Clock,
-  Check,
+  ArrowRight,
+  Lightbulb,
+  Heart,
+  Share2,
+  CheckCircle2,
+  Compass,
+  ChevronRight,
+  ShieldCheck,
+  Stethoscope,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Map badge icon names to Lucide icons
-const BADGE_ICON_MAP: Record<string, React.ElementType> = {
-  HomeMedical: Home,
-  ShoppingBag: ShoppingBag,
-  ShoppingCart: ShoppingCart,
-  ShieldMedical: ShieldCheck,
-  SirenAlert: Siren,
-  MessageCircle: Video,
-  BrainHeart: Brain,
-};
+export default function UserHomeBlogPage() {
+  const { pets } = useApp();
+  const [selectedCategory, setSelectedCategory] = useState<string>("Tümü");
+  const [activeArticle, setActiveArticle] = useState<BlogPostItemData | null>(null);
 
-export default function UserMobileHomePage() {
-  const {
-    pets,
-    activeMobileCategory,
-    setActiveMobileCategory,
-    bookSubService,
-    showToast,
-    selectedTimeSlot,
-    selectedRegion,
-  } = useApp();
+  const categories = ["Tümü", "Aşı & Sağlık", "Beslenme", "Davranış", "Bakım & Hijyen", "İlk Yardım"];
 
-  const [selectedSubService, setSelectedSubService] = useState<SubServiceItem | null>(null);
-  const [selectedWeight, setSelectedWeight] = useState<string>("");
-  const [userNote, setUserNote] = useState<string>("");
-
-  const handleOpenCategory = (cat: MainCategoryItem) => {
-    setActiveMobileCategory(cat);
-    setSelectedSubService(null);
-  };
-
-  const handleSelectSubService = (item: SubServiceItem) => {
-    setSelectedSubService(item);
-    if (item.weightOptions && item.weightOptions.length > 0) {
-      setSelectedWeight(item.weightOptions[0]);
-    } else {
-      setSelectedWeight("");
-    }
-  };
-
-  const handleConfirmOrderOrBooking = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSubService) return;
-
-    bookSubService({
-      subService: selectedSubService,
-      categoryTitle: activeMobileCategory?.title,
-      selectedWeight: selectedWeight,
-      userNotes: userNote,
-    });
-
-    setSelectedSubService(null);
-    setUserNote("");
-  };
+  const filteredPosts =
+    selectedCategory === "Tümü"
+      ? HOME_BLOG_POSTS
+      : HOME_BLOG_POSTS.filter((p) => p.category === selectedCategory);
 
   return (
-    <div className="space-y-4 pb-6 animate-in fade-in duration-300">
-      {/* Registered Pet Bar / Quick Status */}
+    <div className="w-full space-y-4 pb-8 animate-in fade-in duration-300">
+      {/* 1. Welcome & Pet Status Bar */}
       {pets.length > 0 ? (
         <div className="bg-white border border-[#E8DFD3] rounded-2xl p-3 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FFF8F0] border border-[#E8DFD3] flex items-center justify-center text-xl shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-[#FFF8F0] border border-[#E8DFD3] flex items-center justify-center text-2xl shadow-inner">
               {pets[0].species === "Köpek" ? "🐶" : "🐱"}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-heading font-bold text-xs text-[#2D241E]">
+                <span className="font-heading font-extrabold text-sm text-[#2D241E]">
                   {pets[0].name}
                 </span>
-                <span className="text-[10px] text-[#8B7355] bg-[#F4EFE6] px-1.5 py-0.2 rounded-full font-medium">
-                  {pets[0].species}
+                <span className="text-[10px] text-[#8B7355] bg-[#F4EFE6] px-2 py-0.5 rounded-full font-medium">
+                  {pets[0].breed || pets[0].species}
                 </span>
               </div>
-              <span className="text-[10px] text-[#6B7B3C] font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Dijital Takip Aktif
+              <span className="text-[10px] text-[#6B7B3C] font-semibold flex items-center gap-1 mt-0.5">
+                <CheckCircle2 className="w-3 h-3" /> Dijital Sağlık Karnesi Aktif
               </span>
             </div>
           </div>
-          <span className="text-[10px] font-bold text-[#C67B5C] bg-[#C67B5C]/10 px-2.5 py-1 rounded-xl">
-            {pets.length} Dost Kayıtlı
-          </span>
+          <Link
+            href="/account"
+            className="text-[11px] font-bold text-[#C67B5C] bg-[#C67B5C]/10 hover:bg-[#C67B5C]/20 px-2.5 py-1.5 rounded-xl transition-colors"
+          >
+            Profil 🐾
+          </Link>
         </div>
       ) : (
-        <div className="bg-[#FFF8F0] border border-dashed border-[#C67B5C]/40 rounded-2xl p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-xl">🐾</span>
+        <div className="bg-gradient-to-r from-[#FFF8F0] to-[#FFF5EB] border border-[#C67B5C]/30 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-[#C67B5C] text-white flex items-center justify-center text-xl shadow-md">
+              🐾
+            </div>
             <div>
-              <span className="font-bold text-[#2D241E] block text-xs">Dostunuzu Kaydedin</span>
-              <span className="text-[10px] text-[#8B7355]">Aşı & karne takibini başlatın</span>
+              <span className="font-heading font-bold text-xs text-[#2D241E] block">
+                VetRota Sağlık Rehberi
+              </span>
+              <span className="text-[10px] text-[#8B7355]">
+                Dostunuzun sağlığı için hekim önerileri
+              </span>
             </div>
           </div>
-          <Button
-            onClick={() => (window.location.href = "/account")}
-            size="sm"
-            className="bg-[#C67B5C] text-white text-[11px] font-bold rounded-xl h-8 px-3"
+          <Link
+            href="/account"
+            className="text-[10px] font-bold text-white bg-[#C67B5C] hover:bg-[#B5651D] px-3 py-1.5 rounded-xl shadow-sm"
           >
             + Dost Ekle
-          </Button>
+          </Link>
         </div>
       )}
 
-      {/* 2X2 MOBILE SERVICE CARDS GRID MATCHING GETIRVET REFERENCE SCREENSHOT */}
-      <div className="grid grid-cols-2 gap-3">
-        {MAIN_CATEGORIES.slice(0, 6).map((cat) => {
-          const BadgeIcon = BADGE_ICON_MAP[cat.badgeIconName] || Home;
+      {/* 2. Tip of the Day Banner (Günün Veteriner Tavsiyesi) */}
+      <div className="bg-gradient-to-br from-[#FFF9F2] to-[#FFF1E6] border border-[#C67B5C]/30 rounded-2xl p-3.5 shadow-sm space-y-2 relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <span className="inline-flex items-center gap-1 bg-[#C67B5C] text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+            <Lightbulb className="w-3 h-3" />
+            {TIP_OF_THE_DAY.badge}
+          </span>
+          <span className="text-[10px] text-[#8B7355] font-semibold">
+            {TIP_OF_THE_DAY.author}
+          </span>
+        </div>
 
-          return (
-            <div
-              key={cat.id}
-              onClick={() => handleOpenCategory(cat)}
-              className={`${cat.bgColor} border ${cat.borderColor} rounded-[24px] p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all group min-h-[175px]`}
-            >
-              {/* Top Row: Badge Icon & Category Image */}
-              <div className="flex items-start justify-between z-10">
-                {/* Badge Icon Pill */}
-                <div
-                  className={`w-9 h-9 rounded-2xl ${cat.badgeBgColor} ${cat.badgeTextColor} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}
-                >
-                  <BadgeIcon className="w-5 h-5" />
-                </div>
+        <div className="space-y-1">
+          <h3 className="font-heading font-bold text-xs sm:text-sm text-[#2D241E]">
+            {TIP_OF_THE_DAY.title}
+          </h3>
+          <p className="text-[11px] text-[#5C3D2E]/90 leading-relaxed">
+            {TIP_OF_THE_DAY.text}
+          </p>
+        </div>
 
-                {/* Image Illustration */}
-                <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 -mr-1 -mt-1 bg-white/40">
-                  <img
-                    src={cat.image}
-                    alt={cat.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-              </div>
+        {/* Quick link to services */}
+        <div className="pt-1 flex justify-end">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-1 text-[10px] font-bold text-[#C67B5C] hover:underline"
+          >
+            Tüm Hizmetleri İncele
+            <ChevronRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
 
-              {/* Bottom Info: Title & Subtitle */}
-              <div className="mt-3 space-y-1 z-10">
-                {cat.badgeTag && (
-                  <span className="inline-block bg-[#E11D48]/10 text-[#E11D48] text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#E11D48]/20">
-                    {cat.badgeTag}
-                  </span>
-                )}
-                <h3 className="font-heading font-extrabold text-xs sm:text-sm text-[#2D241E] leading-snug group-hover:text-[#C67B5C] transition-colors">
-                  {cat.title}
+      {/* 3. Category Filter Chips (Keşif Başlıkları) */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#2D241E]">
+            <Compass className="w-4 h-4 text-[#C67B5C]" />
+            <span>Sağlık Rehberi & Keşfet</span>
+          </div>
+          <span className="text-[10px] font-semibold text-[#8B7355]">
+            {filteredPosts.length} Makale
+          </span>
+        </div>
+
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          {categories.map((cat) => {
+            const isSelected = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all flex-shrink-0 border ${
+                  isSelected
+                    ? "bg-[#C67B5C] text-white border-[#C67B5C] shadow-sm"
+                    : "bg-white border-[#E8DFD3] text-[#2D241E] hover:border-[#C67B5C]/50"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. Blog Posts Feed (Şık Kapak Fotoğraflı Rehber Kartları) */}
+      <div className="space-y-3.5">
+        {filteredPosts.map((post) => (
+          <article
+            key={post.id}
+            onClick={() => setActiveArticle(post)}
+            className="bg-white border border-[#E8DFD3] hover:border-[#C67B5C] rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col group cursor-pointer"
+          >
+            {/* Cover Image */}
+            <div className="relative w-full h-44 overflow-hidden bg-[#F4EFE6]">
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-44 object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
+
+              {/* Category Badge */}
+              <span className={`absolute top-2.5 left-2.5 font-bold text-[9px] px-2.5 py-0.5 rounded-full shadow-sm border ${post.categoryColor}`}>
+                {post.category}
+              </span>
+
+              {/* Read Time Pill */}
+              <span className="absolute bottom-2.5 right-2.5 text-[10px] font-semibold bg-black/50 backdrop-blur-sm text-white px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <Clock className="w-3 h-3 text-[#FFF8F0]" />
+                {post.readTime}
+              </span>
+            </div>
+
+            {/* Article Content */}
+            <div className="p-3.5 space-y-2">
+              <div className="space-y-1">
+                <h3 className="font-heading font-bold text-sm text-[#2D241E] group-hover:text-[#C67B5C] transition-colors leading-snug">
+                  {post.title}
                 </h3>
-                <p className="text-[10px] text-[#5C3D2E]/80 line-clamp-2 leading-tight">
-                  {cat.shortDesc}
+                <p className="text-[11px] text-[#5C3D2E]/80 line-clamp-2 leading-relaxed">
+                  {post.summary}
                 </p>
               </div>
 
-              {/* Gentle background accent */}
-              <div className="absolute right-0 bottom-0 w-24 h-24 rounded-full bg-white/20 blur-xl pointer-events-none" />
+              {/* Author & Footer */}
+              <div className="pt-2 border-t border-[#F4EFE6] flex items-center justify-between text-[10px] text-[#8B7355]">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-5 h-5 rounded-full bg-[#FFF5EB] border border-[#C67B5C]/30 text-[#C67B5C] flex items-center justify-center font-bold text-[9px]">
+                    🩺
+                  </div>
+                  <span className="font-semibold text-[#2D241E]">{post.author}</span>
+                  <span>• {post.date}</span>
+                </div>
+
+                <span className="font-bold text-[#C67B5C] flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                  Oku <ArrowRight className="w-3 h-3" />
+                </span>
+              </div>
             </div>
-          );
-        })}
+          </article>
+        ))}
       </div>
 
-      {/* 7th Category Card (Full Width Orange Card from Reference Screenshot) */}
-      {MAIN_CATEGORIES[6] && (
-        <div
-          onClick={() => handleOpenCategory(MAIN_CATEGORIES[6])}
-          className={`${MAIN_CATEGORIES[6].bgColor} border ${MAIN_CATEGORIES[6].borderColor} rounded-[24px] p-4 flex items-center justify-between cursor-pointer shadow-sm hover:shadow-md transition-all group relative overflow-hidden`}
-        >
-          <div className="flex items-center gap-3.5 z-10 flex-1">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 bg-white/40">
-              <img
-                src={MAIN_CATEGORIES[6].image}
-                alt={MAIN_CATEGORIES[6].title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-lg bg-[#EA580C] text-white flex items-center justify-center">
-                  <Brain className="w-3.5 h-3.5" />
-                </div>
-                <span className="text-[10px] font-bold text-[#EA580C] uppercase tracking-wider">
-                  Uzman Terapi
-                </span>
-              </div>
-              <h3 className="font-heading font-extrabold text-sm text-[#2D241E]">
-                {MAIN_CATEGORIES[6].title}
-              </h3>
-              <p className="text-[11px] text-[#5C3D2E]/80 leading-tight">
-                {MAIN_CATEGORIES[6].shortDesc}
-              </p>
-            </div>
-          </div>
-
-          <div className="w-8 h-8 rounded-full bg-white text-[#EA580C] flex items-center justify-center shadow-sm flex-shrink-0 group-hover:translate-x-1 transition-transform ml-2">
-            <ChevronRight className="w-4 h-4" />
-          </div>
+      {/* 5. Quick Health Banner (Hizmetler Sayfasına Yönlendirme) */}
+      <div className="bg-gradient-to-r from-[#C67B5C] to-[#B5651D] text-white rounded-2xl p-4 shadow-md space-y-2 text-center">
+        <div className="w-10 h-10 rounded-2xl bg-white/20 mx-auto flex items-center justify-center text-xl">
+          🩺
         </div>
-      )}
+        <h3 className="font-heading font-extrabold text-sm">
+          Dostunuz İçin Randevu Almak İster misiniz?
+        </h3>
+        <p className="text-[11px] text-white/90 leading-relaxed max-w-xs mx-auto">
+          Evde muayene, karma aşılar, parazit bakımı ve klinik randevuları için hizmetlerimizi inceleyin.
+        </p>
+        <Link
+          href="/services"
+          className="inline-flex items-center gap-1.5 bg-white text-[#C67B5C] font-extrabold text-xs px-4 py-2 rounded-xl shadow-sm hover:bg-[#FFF8F0] transition-colors"
+        >
+          Hizmetleri Görüntüle & Randevu Al
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
 
-      {/* CATEGORY DETAILS SLIDE-OVER SHEET / MODAL */}
-      {activeMobileCategory && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 p-0 sm:p-4">
-          <div className="bg-[#FDFBF7] border border-[#E8DFD3] rounded-t-[32px] sm:rounded-[32px] w-full max-w-md p-5 shadow-2xl space-y-4 max-h-[88vh] overflow-y-auto">
-            {/* Sheet Header */}
-            <div className="flex items-center justify-between border-b border-[#E8DFD3] pb-3">
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#C67B5C]">
-                  VetRota Hizmet Kataloğu
-                </span>
-                <h2 className="text-lg font-heading font-extrabold text-[#2D241E]">
-                  {activeMobileCategory.title}
-                </h2>
-              </div>
+      {/* Article Detail Reading Modal */}
+      {activeArticle && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-[#FDFBF7] border border-[#E8DFD3] rounded-t-[28px] sm:rounded-[28px] w-full max-w-md p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E8DFD3] pb-2">
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${activeArticle.categoryColor}`}>
+                {activeArticle.category}
+              </span>
               <button
-                onClick={() => {
-                  setActiveMobileCategory(null);
-                  setSelectedSubService(null);
-                }}
-                className="w-8 h-8 rounded-full bg-[#F4EFE6] text-[#2D241E] flex items-center justify-center font-bold"
+                onClick={() => setActiveArticle(null)}
+                className="w-7 h-7 rounded-full bg-[#F4EFE6] text-[#2D241E] flex items-center justify-center font-bold text-xs"
               >
-                <X className="w-4 h-4" />
+                ✕
               </button>
             </div>
 
-            {/* Sub-Services / Options List */}
-            <div className="space-y-3">
-              {activeMobileCategory.subServices.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => handleSelectSubService(item)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-2 ${
-                    selectedSubService?.id === item.id
-                      ? "bg-[#FFF5EB] border-[#C67B5C] shadow-md ring-2 ring-[#C67B5C]/20"
-                      : "bg-white border-[#E8DFD3] hover:border-[#C67B5C]/50 shadow-sm"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      {item.brand && (
-                        <span className="text-[9px] font-bold bg-[#F4EFE6] text-[#8B7355] px-2 py-0.5 rounded-full uppercase tracking-wider block w-max mb-1">
-                          {item.brand}
-                        </span>
-                      )}
-                      <h4 className="font-heading font-bold text-xs sm:text-sm text-[#2D241E]">
-                        {item.name}
-                      </h4>
-                    </div>
-                    <div className="text-right flex-shrink-0 ml-2">
-                      <span className="text-sm font-heading font-extrabold text-[#C67B5C] block">
-                        {item.price} ₺
-                      </span>
-                      {item.unit && (
-                        <span className="text-[10px] text-[#8B7355] font-medium block">
-                          / {item.unit}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-[#5C3D2E]/80 leading-relaxed">
-                    {item.description}
-                  </p>
-
-                  {/* Mandatory Notice Box (e.g. Lösemi aşısı için test şartı) */}
-                  {item.requiresNotice && (
-                    <div className="p-2.5 rounded-xl bg-[#FFF1F2] border border-[#E11D48]/30 flex items-start gap-2 text-[10px] text-[#BE123C] font-semibold">
-                      <Info className="w-4 h-4 text-[#E11D48] flex-shrink-0 mt-0.5" />
-                      <span>{item.noticeText}</span>
-                    </div>
-                  )}
-
-                  {/* Weight / Size Selection Pills */}
-                  {item.weightOptions && item.weightOptions.length > 0 && (
-                    <div className="pt-1">
-                      <span className="text-[10px] font-bold text-[#8B7355] block mb-1">
-                        Kilo / Beden Seçiniz:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.weightOptions.map((opt) => (
-                          <button
-                            key={opt}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedSubService(item);
-                              setSelectedWeight(opt);
-                            }}
-                            className={`text-[10px] px-2.5 py-1 rounded-xl border font-bold transition-all ${
-                              selectedSubService?.id === item.id && selectedWeight === opt
-                                ? "bg-[#C67B5C] text-white border-[#C67B5C]"
-                                : "bg-[#FDFBF7] text-[#2D241E] border-[#E8DFD3]"
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Features list */}
-                  {item.features && (
-                    <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] text-[#6B7B3C] font-semibold">
-                      {item.features.map((f) => (
-                        <span key={f} className="flex items-center gap-1 bg-[#6B7B3C]/10 px-2 py-0.5 rounded-lg">
-                          <Check className="w-3 h-3 text-[#6B7B3C]" /> {f}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="space-y-2">
+              <h2 className="text-base font-heading font-extrabold text-[#2D241E] leading-snug">
+                {activeArticle.title}
+              </h2>
+              <div className="flex items-center gap-2 text-[10px] text-[#8B7355]">
+                <span>✍️ {activeArticle.author} ({activeArticle.authorTitle})</span>
+                <span>• ⏱️ {activeArticle.readTime}</span>
+              </div>
             </div>
 
-            {/* Selected Item Confirmation Form */}
-            {selectedSubService && (
-              <form
-                onSubmit={handleConfirmOrderOrBooking}
-                className="p-4 rounded-2xl bg-[#FFF8F0] border border-[#C67B5C]/30 space-y-3 animate-in fade-in duration-200"
+            <div className="w-full h-44 rounded-xl overflow-hidden shadow-sm">
+              <img
+                src={activeArticle.image}
+                alt={activeArticle.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="text-xs text-[#5C3D2E] space-y-2.5 leading-relaxed">
+              <p className="font-semibold text-[#2D241E]">
+                {activeArticle.summary}
+              </p>
+              <p>
+                Evcil hayvanlarımızın sağlığını korumanın en etkili yolu koruyucu veteriner hekimlik uygulamalarıdır. Düzenli aşı takibi, mevsimsel paraziter koruma ve kaliteli beslenme programları dostlarımızın yaşam kalitesini ve ömrünü belirgin şekilde artırır.
+              </p>
+              <p>
+                Dostunuzda halsizlik, iştahsızlık veya davranış değişiklikleri gözlemlediğinizde vakit kaybetmeden hekim kontrolü talep ediniz.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-[#E8DFD3] flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setActiveArticle(null)}
+                className="flex-1 text-xs h-9 rounded-xl border-[#E8DFD3]"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-[#2D241E]">
-                  <span>Seçilen Hizmet:</span>
-                  <span className="text-[#C67B5C] font-extrabold text-sm">
-                    {selectedSubService.name}
-                  </span>
-                </div>
-
-                <div className="text-[11px] text-[#8B7355] space-y-1">
-                  <p>📍 <strong>Adres:</strong> {selectedRegion.name}, {selectedRegion.district}</p>
-                  <p>⏰ <strong>Zaman:</strong> {selectedTimeSlot}</p>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-bold text-[#2D241E] block mb-1">
-                    Hekim için Not veya Açıklama (Opsiyonel):
-                  </label>
-                  <input
-                    type="text"
-                    value={userNote}
-                    onChange={(e) => setUserNote(e.target.value)}
-                    placeholder="Örn: Dostum biraz huysuzlanabilir, zil çalmayın..."
-                    className="w-full text-xs p-2.5 rounded-xl border border-[#E8DFD3] bg-white outline-none focus:border-[#C67B5C]"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-[#C67B5C] hover:bg-[#B5651D] text-white font-bold rounded-xl text-xs h-11 shadow-md gap-2"
-                >
-                  Siparişi / Randevuyu Onayla ({selectedSubService.price} ₺)
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </form>
-            )}
+                Kapat
+              </Button>
+              <Button
+                asChild
+                className="flex-1 bg-[#C67B5C] hover:bg-[#B5651D] text-white text-xs h-9 rounded-xl font-bold gap-1"
+              >
+                <Link href="/services">
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  Randevu Al
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       )}
