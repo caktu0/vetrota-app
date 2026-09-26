@@ -56,7 +56,7 @@ export default function RootLayout({
             <Header />
             
             {/* Scrollable Mobile App Body Canvas */}
-            <main className="flex-1 overflow-y-auto no-scrollbar pb-24 px-3.5 pt-2">
+            <main className="flex-1 overflow-y-auto no-scrollbar pb-28 px-3.5 pt-2">
               {children}
             </main>
 

@@ -54,26 +54,26 @@ export default function EvePetshopPage() {
   };
 
   return (
-    <div className="w-full space-y-3 pb-24 animate-in fade-in duration-300">
+    <div className="w-full max-w-full overflow-hidden space-y-3 pb-28 animate-in fade-in duration-300">
       {/* 1. Header Bar */}
       <div className="flex items-center justify-between pt-1">
         <Link
           href="/services"
-          className="w-9 h-9 rounded-full bg-white border border-[#E8DFD3] flex items-center justify-center text-[#2D241E] shadow-sm hover:bg-[#F4EFE6] transition-colors"
+          className="w-9 h-9 rounded-full bg-white border border-[#E8DFD3] flex items-center justify-center text-[#2D241E] shadow-sm hover:bg-[#F4EFE6] transition-colors shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
         </Link>
-        <div className="text-center">
-          <h1 className="font-heading font-extrabold text-sm text-[#2D241E]">
+        <div className="text-center px-2 min-w-0">
+          <h1 className="font-heading font-extrabold text-base md:text-lg text-[#2D241E] truncate">
             Eve Petshop Ürünleri
           </h1>
-          <p className="text-[10px] text-[#8B7355]">
+          <p className="text-xs md:text-sm text-slate-600 truncate">
             Kum, oyuncak, tasma, kıyafet ve hijyen ürünleri
           </p>
         </div>
         <Link
           href="/cart"
-          className="w-9 h-9 rounded-full bg-[#10B981] text-white flex items-center justify-center shadow-md relative hover:bg-[#059669] transition-colors"
+          className="w-9 h-9 rounded-full bg-[#10B981] text-white flex items-center justify-center shadow-md relative hover:bg-[#059669] transition-colors shrink-0"
         >
           <ShoppingCart className="w-4 h-4" />
           {cartCount > 0 && (

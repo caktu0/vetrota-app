@@ -40,7 +40,7 @@ export function BottomNav() {
   const navItems = role === "VET" ? vetNavItems : userNavItems;
 
   return (
-    <nav className="absolute bottom-0 left-0 right-0 z-40 bg-[#FDFBF7]/95 backdrop-blur-md border-t border-[#E8DFD3] pb-2 pt-1.5 px-3 flex items-center justify-around flex-shrink-0">
+    <nav className="absolute bottom-0 left-0 right-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-t border-[#E8DFD3] pb-2 pt-1.5 px-3 flex items-center justify-around flex-shrink-0">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive =

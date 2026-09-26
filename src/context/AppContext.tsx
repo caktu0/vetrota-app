@@ -24,6 +24,7 @@ import {
   BLOG_POSTS as INITIAL_BLOG_DATA,
 } from "@/lib/constants";
 import { askGemini } from "@/lib/gemini";
+import { DEFAULT_MOCK_PETS } from "@/lib/mockData";
 
 interface ToastInfo {
   message: string;
@@ -50,8 +51,11 @@ interface AppContextType {
   activeMobileCategory: MainCategoryItem | null;
   setActiveMobileCategory: (cat: MainCategoryItem | null) => void;
 
-  // Pets
+  // Pets & Active Pet Selection
   pets: PetItem[];
+  activePetId: string;
+  setActivePetId: (id: string) => void;
+  activePet: PetItem | null;
   addPet: (pet: Omit<PetItem, "id" | "userId">) => void;
   updatePet: (id: string, pet: Partial<PetItem>) => void;
   removePet: (id: string) => void;
@@ -132,7 +136,7 @@ const DEFAULT_USER: UserProfile = {
   id: "user-default",
   name: "Yasin",
   surname: "Demir",
-  email: "yasin@vetrota.com",
+  email: "kklmqegmk@dumen.com",
   phone: "0532 555 0123",
   role: "USER",
   emailVerified: true,
@@ -163,6 +167,87 @@ const INITIAL_MESSAGES: ChatMessageItem[] = [
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const DEFAULT_MOCK_APPOINTMENTS: AppointmentItem[] = [
+  {
+    id: "appt-101",
+    userId: "user-default",
+    userName: "Yasin Demir",
+    userPhone: "0532 555 0123",
+    vetId: "vet-1",
+    vetName: "Dr. Selin Aydın",
+    categoryId: "evde-saglik",
+    categoryTitle: "Evde Sağlık Hizmetleri",
+    serviceId: "sag-kedi-karma-asi",
+    serviceName: "Evde Karma Aşı Uygulaması",
+    servicePrice: 750,
+    type: "home",
+    petId: "pet-1",
+    petName: "Pamuk",
+    petSpecies: "Kedi",
+    addressId: "addr-1",
+    addressSummary: "Fenerbahçe, Kadıköy",
+    district: "Kadıköy",
+    neighborhood: "Fenerbahçe",
+    date: "2026-10-12",
+    time: "11:00",
+    status: "CONFIRMED",
+    userNotes: "Pamuk aşıdan bir miktar korkabilir.",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "appt-102",
+    userId: "user-default",
+    userName: "Yasin Demir",
+    userPhone: "0532 555 0123",
+    vetId: "vet-1",
+    vetName: "Dr. Selin Aydın",
+    categoryId: "evde-saglik",
+    categoryTitle: "Evde Sağlık Hizmetleri",
+    serviceId: "evde-genel-muayene",
+    serviceName: "Evde Genel Muayene",
+    servicePrice: 800,
+    type: "home",
+    petId: "pet-2",
+    petName: "Duman",
+    petSpecies: "Köpek",
+    addressId: "addr-1",
+    addressSummary: "Fenerbahçe, Kadıköy",
+    district: "Kadıköy",
+    neighborhood: "Fenerbahçe",
+    date: "2026-09-15",
+    time: "14:30",
+    status: "COMPLETED",
+    vetNotes: "Kilo takibi iyi, genel durumu sağlıklı.",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "appt-103",
+    userId: "user-default",
+    userName: "Yasin Demir",
+    userPhone: "0532 555 0123",
+    vetId: "vet-1",
+    vetName: "Dr. Selin Aydın",
+    categoryId: "evde-saglik",
+    categoryTitle: "Evde Sağlık Hizmetleri",
+    serviceId: "evde-acil",
+    serviceName: "Evde Acil Durum Hizmeti",
+    servicePrice: 1200,
+    type: "home",
+    petId: "pet-3",
+    petName: "Limon",
+    petSpecies: "Kuş",
+    addressId: "addr-1",
+    addressSummary: "Fenerbahçe, Kadıköy",
+    district: "Kadıköy",
+    neighborhood: "Fenerbahçe",
+    date: "2026-08-20",
+    time: "09:00",
+    status: "CANCELLED",
+    userNotes: "Kullanıcı talebiyle randevu iptal edildi.",
+    createdAt: new Date().toISOString(),
+  },
+];
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [role, setRoleState] = useState<UserRole>("USER");
@@ -172,9 +257,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastInfo | null>(null);
   
   const [activeMobileCategory, setActiveMobileCategory] = useState<MainCategoryItem | null>(null);
-  const [pets, setPets] = useState<PetItem[]>([]);
+  const [pets, setPets] = useState<PetItem[]>(DEFAULT_MOCK_PETS);
+  const [activePetId, setActivePetIdState] = useState<string>(DEFAULT_MOCK_PETS[0].id);
   const [addresses, setAddresses] = useState<AddressItem[]>([]);
-  const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentItem[]>(DEFAULT_MOCK_APPOINTMENTS);
   const [blogPosts, setBlogPosts] = useState<BlogPostItem[]>(INITIAL_BLOG_DATA as any);
   const [messages, setMessages] = useState<ChatMessageItem[]>(INITIAL_MESSAGES);
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -184,6 +270,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [newsletterEmails, setNewsletterEmails] = useState<string[]>([]);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [isTimeSlotModalOpen, setIsTimeSlotModalOpen] = useState(false);
+
+  // Active pet object computation
+  const activePet = pets.find((p) => p.id === activePetId) || pets[0] || null;
+
+  const setActivePetId = (id: string) => {
+    setActivePetIdState(id);
+    localStorage.setItem("vetrota_active_pet", id);
+    const pet = pets.find((p) => p.id === id);
+    if (pet) {
+      showToast(`${pet.name} (${pet.species}) seçildi 🐾`, "info");
+    }
+  };
 
   // Load from LocalStorage on mount
   useEffect(() => {
@@ -206,7 +304,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (found) setSelectedRegionState(found);
       }
       const savedPets = localStorage.getItem("vetrota_pets");
-      if (savedPets) setPets(JSON.parse(savedPets));
+      if (savedPets) {
+        const parsed = JSON.parse(savedPets);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setPets(parsed);
+        }
+      }
+      const savedActivePet = localStorage.getItem("vetrota_active_pet");
+      if (savedActivePet) {
+        setActivePetIdState(savedActivePet);
+      }
       
       const savedAddrs = localStorage.getItem("vetrota_addresses");
       if (savedAddrs) setAddresses(JSON.parse(savedAddrs));
@@ -704,6 +811,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeMobileCategory,
         setActiveMobileCategory,
         pets,
+        activePetId,
+        setActivePetId,
+        activePet,
         addPet,
         updatePet,
         removePet,

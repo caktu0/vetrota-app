@@ -571,3 +571,89 @@ export const MOCK_COUPONS: Record<string, { discountPercent?: number; discountFi
   "PATI20": { discountFixed: 100, desc: "100 ₺ Pati Dostu İndirimi" },
   "EVESAGLIK": { discountPercent: 15, desc: "%15 Evde Sağlık Kampanyası" },
 };
+
+// ==========================================
+// 5. DEFAULT MOCK PETS WITH VACCINE SCHEDULE
+// ==========================================
+export const DEFAULT_MOCK_PETS: import("@/types").PetItem[] = [
+  {
+    id: "pet-pamuk",
+    userId: "user-default",
+    name: "Pamuk",
+    species: "Kedi",
+    breed: "British Shorthair",
+    age: 2,
+    weight: 4.2,
+    gender: "Dişi",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&auto=format&fit=crop&q=80",
+    upcomingVaccine: {
+      id: "vac-pamuk-1",
+      name: "Karma 2 Aşısı",
+      dueDate: "12 Ekim 2026",
+      dueDaysText: "14 Gün Kaldı",
+      status: "UPCOMING",
+      serviceId: "sag-kedi-karma-asi",
+      isMandatory: true,
+    },
+    vaccineHistory: [
+      {
+        id: "hist-pamuk-1",
+        name: "Aylık İç/Dış Parazit",
+        dueDate: "15 Ağustos 2026",
+        dueDaysText: "Tamamlandı",
+        status: "COMPLETED",
+        serviceId: "sag-kedi-aylik-parazit",
+      },
+    ],
+  },
+  {
+    id: "pet-duman",
+    userId: "user-default",
+    name: "Duman",
+    species: "Köpek",
+    breed: "Golden Retriever",
+    age: 3,
+    weight: 28.5,
+    gender: "Erkek",
+    image: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=300&auto=format&fit=crop&q=80",
+    upcomingVaccine: {
+      id: "vac-duman-1",
+      name: "Yıllık Kuduz Aşısı",
+      dueDate: "18 Ekim 2026",
+      dueDaysText: "20 Gün Kaldı",
+      status: "UPCOMING",
+      serviceId: "sag-kuduz-asi",
+      isMandatory: true,
+    },
+    vaccineHistory: [
+      {
+        id: "hist-duman-1",
+        name: "Köpek Bronşin Aşısı",
+        dueDate: "10 Temmuz 2026",
+        dueDaysText: "Tamamlandı",
+        status: "COMPLETED",
+        serviceId: "sag-kopek-bronsin-asi",
+      },
+    ],
+  },
+  {
+    id: "pet-limon",
+    userId: "user-default",
+    name: "Limon",
+    species: "Kuş",
+    breed: "Muhabbet Kuşu",
+    age: 1,
+    gender: "Erkek",
+    image: "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=300&auto=format&fit=crop&q=80",
+    upcomingVaccine: {
+      id: "vac-limon-1",
+      name: "Genel Muayene & Gaga/Tırnak",
+      dueDate: "25 Ekim 2026",
+      dueDaysText: "27 Gün Kaldı",
+      status: "UPCOMING",
+      serviceId: "sag-evde-muayene",
+      isMandatory: false,
+    },
+  },
+];
+

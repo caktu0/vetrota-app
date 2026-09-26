@@ -173,24 +173,24 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="w-full space-y-3 pb-8 animate-in fade-in duration-300">
+    <div className="w-full max-w-full overflow-hidden space-y-3 pb-8 animate-in fade-in duration-300">
       {/* 2-COLUMN SERVICE CARDS GRID (GetirVet Tarzı 2 Sütunlu Kart Düzeni) */}
       <div className="grid grid-cols-2 gap-3 pt-0.5">
         {GETIRVET_SERVICES.slice(0, 6).map((card) => (
           <div
             key={card.id}
             onClick={() => handleCardClick(card)}
-            className={`${card.bgColor} border ${card.borderColor} rounded-[24px] p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all group min-h-[195px]`}
+            className={`${card.bgColor} border ${card.borderColor} rounded-[24px] p-3.5 flex flex-col justify-between relative overflow-hidden cursor-pointer shadow-sm hover:shadow-md transition-all group min-h-[195px] w-full max-w-full`}
           >
             {/* Top Row: Icon Badge & Cutout Image */}
             <div className="flex items-start justify-between z-10">
               <div
-                className={`w-9 h-9 rounded-2xl ${card.badgeBg} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}
+                className={`w-9 h-9 rounded-2xl ${card.badgeBg} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform shrink-0`}
               >
                 {card.badgeIcon}
               </div>
 
-              <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 -mr-1 -mt-1 bg-white/50 border border-white/60">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-sm shrink-0 -mr-1 -mt-1 bg-white/50 border border-white/60">
                 <img
                   src={card.imageUrl}
                   alt={card.title}
@@ -202,10 +202,10 @@ export default function ServicesPage() {
             {/* Content: Title, Description & Action Button */}
             <div className="mt-2.5 space-y-2 z-10">
               <div>
-                <h3 className="font-heading font-extrabold text-xs sm:text-sm text-[#2D241E] leading-snug group-hover:text-[#C87D55] transition-colors">
+                <h3 className="font-heading font-semibold text-xs sm:text-sm md:text-base text-[#2D241E] leading-snug group-hover:text-[#C87D55] transition-colors break-words">
                   {card.title}
                 </h3>
-                <p className="text-[10px] text-[#5C3D2E]/80 line-clamp-2 leading-tight mt-0.5">
+                <p className="text-[11px] sm:text-xs text-slate-600 line-clamp-2 leading-tight mt-0.5 break-words">
                   {card.shortDesc}
                 </p>
               </div>
@@ -217,12 +217,12 @@ export default function ServicesPage() {
                     {card.badgeTag}
                   </span>
                 ) : (
-                  <span className="text-[9px] font-bold text-[#C87D55] flex items-center gap-0.5 group-hover:underline">
+                  <span className="text-[10px] sm:text-xs font-bold text-[#C87D55] flex items-center gap-0.5 group-hover:underline">
                     {card.actionText} <ArrowRight className="w-2.5 h-2.5" />
                   </span>
                 )}
                 
-                <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-white text-[#C87D55] flex items-center justify-center shadow-xs">
+                <div className="w-6 h-6 rounded-full bg-white/90 group-hover:bg-white text-[#C87D55] flex items-center justify-center shadow-xs shrink-0">
                   <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
                 </div>
               </div>
@@ -237,10 +237,10 @@ export default function ServicesPage() {
         {GETIRVET_SERVICES[6] && (
           <div
             onClick={() => handleCardClick(GETIRVET_SERVICES[6])}
-            className={`col-span-2 ${GETIRVET_SERVICES[6].bgColor} border ${GETIRVET_SERVICES[6].borderColor} rounded-[24px] p-3.5 flex items-center justify-between cursor-pointer shadow-sm hover:shadow-md transition-all group relative overflow-hidden`}
+            className={`col-span-2 ${GETIRVET_SERVICES[6].bgColor} border ${GETIRVET_SERVICES[6].borderColor} rounded-[24px] p-3.5 flex items-center justify-between cursor-pointer shadow-sm hover:shadow-md transition-all group relative overflow-hidden w-full max-w-full`}
           >
             <div className="flex items-center gap-3 z-10 flex-1 min-w-0">
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-sm flex-shrink-0 bg-white/50 border border-white/60">
+              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-sm shrink-0 bg-white/50 border border-white/60">
                 <img
                   src={GETIRVET_SERVICES[6].imageUrl}
                   alt={GETIRVET_SERVICES[6].title}
@@ -248,28 +248,28 @@ export default function ServicesPage() {
                 />
               </div>
 
-              <div className="space-y-1 min-w-0">
+              <div className="space-y-1 min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-6 h-6 rounded-xl bg-[#EA580C] flex items-center justify-center text-white shadow-xs">
+                  <div className="w-6 h-6 rounded-xl bg-[#EA580C] flex items-center justify-center text-white shadow-xs shrink-0">
                     {GETIRVET_SERVICES[6].badgeIcon}
                   </div>
                   <span className="text-[10px] font-extrabold text-[#EA580C] uppercase tracking-wider">
                     Uzman Terapi
                   </span>
                 </div>
-                <h3 className="font-heading font-extrabold text-xs sm:text-sm text-[#1E1B2E] leading-snug">
+                <h3 className="font-heading font-semibold text-xs sm:text-sm md:text-base text-[#1E1B2E] leading-snug break-words">
                   {GETIRVET_SERVICES[6].title}
                 </h3>
-                <p className="text-[10px] text-[#5C5870] line-clamp-2 leading-tight">
+                <p className="text-[11px] sm:text-xs text-slate-600 line-clamp-2 leading-tight break-words">
                   {GETIRVET_SERVICES[6].shortDesc}
                 </p>
-                <span className="text-[9px] font-bold text-[#EA580C] inline-flex items-center gap-0.5 pt-0.5">
+                <span className="text-[10px] sm:text-xs font-bold text-[#EA580C] inline-flex items-center gap-0.5 pt-0.5">
                   Randevu Oluştur <ArrowRight className="w-2.5 h-2.5" />
                 </span>
               </div>
             </div>
 
-            <div className="w-8 h-8 rounded-full bg-white text-[#EA580C] flex items-center justify-center shadow-sm flex-shrink-0 group-hover:translate-x-1 transition-transform ml-2">
+            <div className="w-8 h-8 rounded-full bg-white text-[#EA580C] flex items-center justify-center shadow-sm shrink-0 group-hover:translate-x-1 transition-transform ml-2">
               <ChevronRight className="w-4 h-4 stroke-[2.5]" />
             </div>
           </div>

@@ -12,6 +12,16 @@ export interface UserProfile {
   clinic?: string;
 }
 
+export interface VaccineScheduleItem {
+  id: string;
+  name: string; // e.g. "Karma 2 Aşısı", "Kuduz Aşısı", "Lösemi Aşısı", "İç/Dış Parazit"
+  dueDate: string; // e.g. "12 Ekim 2026"
+  dueDaysText: string; // e.g. "14 Gün Kaldı"
+  status: "UPCOMING" | "OVERDUE" | "COMPLETED";
+  serviceId: string; // e.g. "sag-kedi-karma-asi"
+  isMandatory?: boolean;
+}
+
 export interface PetItem {
   id: string;
   userId: string;
@@ -23,6 +33,8 @@ export interface PetItem {
   gender?: "Erkek" | "Dişi";
   notes?: string;
   image?: string;
+  upcomingVaccine?: VaccineScheduleItem;
+  vaccineHistory?: VaccineScheduleItem[];
 }
 
 export interface AddressItem {

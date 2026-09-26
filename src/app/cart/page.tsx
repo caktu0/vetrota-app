@@ -248,7 +248,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="w-full space-y-3.5 pb-28 animate-in fade-in duration-300">
+    <div className="w-full max-w-full overflow-hidden space-y-3.5 pb-32 animate-in fade-in duration-300">
       {/* 1. Header Bar */}
       <div className="flex items-center justify-between pt-1">
         <Link
@@ -439,19 +439,19 @@ export default function CartPage() {
         </div>
       </div>
 
-      {/* 6. Sticky Checkout Bar */}
-      <div className="fixed bottom-14 left-0 right-0 z-40 max-w-md mx-auto px-4 pointer-events-none">
-        <div className="bg-[#2D241E] text-white rounded-2xl p-3 shadow-2xl border border-white/10 flex items-center justify-between gap-3 pointer-events-auto backdrop-blur-md">
-          <div>
+      {/* 6. Sticky Checkout Bar (Tamamen Bottom Nav'ın Üstünde - bottom-20 / bottom-[72px] z-40) */}
+      <div className="fixed bottom-20 left-0 right-0 z-40 max-w-md mx-auto px-4 pointer-events-none">
+        <div className="bg-[#2D241E] text-white rounded-2xl p-3 shadow-[0_10px_25px_rgba(0,0,0,0.4)] border border-white/10 flex items-center justify-between gap-3 pointer-events-auto backdrop-blur-md">
+          <div className="min-w-0">
             <div className="text-[10px] text-gray-300">Ödenecek Tutar</div>
-            <div className="text-base font-extrabold text-[#F5EFE6] leading-tight">
+            <div className="text-base sm:text-lg font-extrabold text-[#F5EFE6] leading-tight truncate">
               {grandTotal.toLocaleString("tr-TR")} ₺
             </div>
           </div>
 
           <Button
             onClick={() => setIsCheckoutOpen(true)}
-            className="px-6 py-3 bg-[#C87D55] hover:bg-[#B86B43] text-white font-extrabold text-xs rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-5 sm:px-6 py-3 bg-[#C87D55] hover:bg-[#B86B43] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-lg active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
           >
             <span>Sepeti Onayla</span>
             <ChevronRight className="w-4 h-4 stroke-[3]" />
